@@ -1,0 +1,49 @@
+# Rebuild the release archives after every push to main.
+# One release, tag "skills", always holds the archives and skills.json of the latest main;
+# gajsin.tech reads skills.json from it. No secrets: the job uses its own GITHUB_TOKEN.
+name: Publish archives
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: publish-archives
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Build archives and skills.json
+        run: python scripts/publish_manifest.py --output "$RUNNER_TEMP/dist" --download-base "https://github.com/${GITHUB_REPOSITORY}/releases/download/skills"
+
+      - name: Move the skills tag to this commit
+        run: |
+          git tag --force skills "$GITHUB_SHA"
+          git push --force origin refs/tags/skills
+
+      - name: Publish the release
+        run: |
+          notes="Archives for Codex, Claude Code and Antigravity, built from ${GITHUB_SHA}. Rebuilt on every push to main."
+          if gh release view skills > /dev/null 2>&1; then
+            gh release upload skills "$RUNNER_TEMP/dist"/*.zip --clobber
+            gh release upload skills "$RUNNER_TEMP/dist"/skills.json --clobber
+            gh release edit skills --notes "$notes"
+          else
+            gh release create skills "$RUNNER_TEMP/dist"/*.zip "$RUNNER_TEMP/dist"/skills.json --title "Skills" --notes "$notes" --latest
+          fi

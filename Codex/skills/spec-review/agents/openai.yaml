@@ -1,0 +1,7 @@
+interface:
+  display_name: "Spec Review"
+  short_description: "Review changes or projects with code-quality evidence"
+  default_prompt: "Use $spec-review to review the requested changes or audit the project, verify applicable automated evidence, and report findings without unrequested fixes."
+
+policy:
+  allow_implicit_invocation: false

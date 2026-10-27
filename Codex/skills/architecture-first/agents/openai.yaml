@@ -1,0 +1,7 @@
+interface:
+  display_name: "Architecture First"
+  short_description: "Trace first, then make the smallest correct change"
+  default_prompt: "Use $architecture-first to trace the affected system and carry out only the requested stage: analysis, design, implementation, or review."
+
+policy:
+  allow_implicit_invocation: false

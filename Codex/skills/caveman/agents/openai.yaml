@@ -1,0 +1,8 @@
+# Local adaptation: English UI metadata and explicit invocation; 2026-10-25.
+interface:
+  display_name: "Caveman"
+  short_description: "Concise replies without losing meaning"
+  default_prompt: "Use $caveman for concise, clear replies in this conversation."
+
+policy:
+  allow_implicit_invocation: false

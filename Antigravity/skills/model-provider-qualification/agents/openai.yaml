@@ -1,0 +1,4 @@
+interface:
+  display_name: "Model Provider Qualification"
+  short_description: "Qualify model/provider behavior before paid tests or deploys"
+  default_prompt: "Qualify this model and provider combination against the working production baseline before any paid full-pipeline test or deployment."

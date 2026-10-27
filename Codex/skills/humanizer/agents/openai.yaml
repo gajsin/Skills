@@ -1,0 +1,7 @@
+interface:
+  display_name: "Humanizer"
+  short_description: "Natural prose and grounded session summaries"
+  default_prompt: "Use $humanizer to write or edit the requested text naturally from the available context."
+
+policy:
+  allow_implicit_invocation: false

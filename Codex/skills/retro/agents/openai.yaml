@@ -1,0 +1,6 @@
+interface:
+  display_name: "Retro"
+  short_description: "Review agent mistakes and improve the workflow"
+  default_prompt: "Use $retro to review this session and propose minimal corrections to demonstrated mistakes."
+policy:
+  allow_implicit_invocation: false

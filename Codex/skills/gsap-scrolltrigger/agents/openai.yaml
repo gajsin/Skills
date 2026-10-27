@@ -1,0 +1,6 @@
+interface:
+  display_name: "GSAP ScrollTrigger"
+  short_description: "Scroll-driven website animation with GSAP"
+  default_prompt: "Use $gsap-scrolltrigger for the agreed scroll animation in this project."
+policy:
+  allow_implicit_invocation: false

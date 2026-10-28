@@ -4,7 +4,7 @@ description: Write or edit natural prose and grounded summaries from the availab
 license: MIT
 metadata:
   version: "3.1.0"
-  local_revision: "2026-10-26"
+  local_revision: "2026-10-28"
 ---
 
 # Humanizer
@@ -82,17 +82,26 @@ not replacing dashes with spaced hyphens. Preserve correct grammar, protected te
 and numeric ranges unless the user specifically targets them. One dash, ordinary
 word, or useful list alone is not a defect or evidence of AI authorship.
 
-## Read once more, then deliver
+## Compose and check, then deliver
+
+For a reply in an existing conversation, silently separate what the recipient has
+already been told, what is new, and what remains unresolved before drafting.
+Write the next reply; retain background only when needed to understand it.
+Before delivery, remove unnecessary repetition. In task-related correspondence,
+keep a question or access request only if the next necessary step depends on it
+and the available material cannot resolve it. Check claims against their sources;
+preserve conditions, limits, and certainty after shortening.
 
 Read the draft silently as a message to its recipient. Fix awkward grammar, unclear
 references, bureaucratic phrasing, and choppy rhythm. Do not manufacture slang,
-mistakes, emotion, or an alternating long-short rhythm. Compare changed claims with
-the source; restore lost meaning. Leave already natural wording alone.
+mistakes, emotion, or an alternating long-short rhythm. Leave already natural
+wording alone.
 
 Return the finished text by default; add explanations or alternatives when asked.
 With another active workflow, preserve its required output. Edit only authorized
 prose in files and briefly report file changes; writing does not authorize product
-or configuration changes. Caveman may shorten wording without flattening the voice.
+or configuration changes. If Caveman is active, shorten wording after settling the
+message; preserve its meaning and voice.
 
 For calibration when needed, read the relevant language section of
 [examples.md](references/examples.md). Open [research.md](references/research.md)

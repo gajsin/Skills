@@ -11,6 +11,7 @@ import io
 import json
 import os
 from pathlib import Path, PurePosixPath
+import re
 import subprocess
 import sys
 import tarfile
@@ -26,9 +27,14 @@ TOOLS = {
 DEPENDENCIES = ("tree-sitter==0.26.0", "tree-sitter-language-pack==1.22.1")
 
 
+def adaptation_hash() -> str:
+    folder = Path(__file__).resolve().parents[1] / "patches"
+    return hashlib.sha256(b"".join((folder / name).read_bytes() for name in ("mutator-windows.patch", "windows.py"))).hexdigest()
+
+
 def runtime_dir() -> Path:
     home = Path(os.environ.get("SPEC_REVIEW_TOOLS_HOME", Path.home() / ".cache" / "spec-review-tools"))
-    identity = json.dumps([TOOLS, DEPENDENCIES, sys.version_info[:2]], sort_keys=True)
+    identity = json.dumps([TOOLS, DEPENDENCIES, sys.version_info[:2], adaptation_hash()], sort_keys=True)
     return home.expanduser().resolve() / hashlib.sha256(identity.encode()).hexdigest()[:16]
 
 
@@ -40,7 +46,51 @@ def ready(runtime: Path) -> bool:
     stamp = runtime / "ready.json"
     if not stamp.is_file() or not tool_python(runtime).is_file():
         return False
-    return json.loads(stamp.read_text(encoding="utf-8")) == {"tools": {k: v[0] for k, v in TOOLS.items()}, "dependencies": list(DEPENDENCIES)}
+    return json.loads(stamp.read_text(encoding="utf-8")) == {"tools": {k: v[0] for k, v in TOOLS.items()}, "dependencies": list(DEPENDENCIES), "adaptation": adaptation_hash()}
+
+
+def apply_adaptation(source: Path) -> None:
+    folder = Path(__file__).resolve().parents[1] / "patches"
+    stamp = source / ".compat-sha256"
+    if stamp.exists():
+        if stamp.read_text(encoding="ascii") != adaptation_hash():
+            raise ValueError("Existing Mutator adaptation does not match this skill")
+        return
+    lines = (folder / "mutator-windows.patch").read_text(encoding="utf-8").splitlines(True)
+    changed, index = {}, 0
+    while index < len(lines):
+        if not lines[index].startswith("--- a/") or not lines[index + 1].startswith("+++ b/"):
+            raise ValueError("Invalid Mutator compatibility patch header")
+        relative = lines[index + 1][6:].strip()
+        target = (source / relative).resolve()
+        if not target.is_relative_to(source.resolve()):
+            raise ValueError("Compatibility patch escapes its source directory")
+        original = target.read_text(encoding="utf-8").splitlines(True)
+        output, cursor = [], 0
+        index += 2
+        while index < len(lines) and not lines[index].startswith("--- a/"):
+            match = re.match(r"@@ -(\d+)(?:,\d+)? \+\d+(?:,\d+)? @@", lines[index])
+            if not match:
+                raise ValueError("Invalid compatibility patch hunk")
+            start = int(match.group(1)) - 1
+            if start < cursor:
+                raise ValueError("Overlapping compatibility patch hunks")
+            output.extend(original[cursor:start])
+            cursor, index = start, index + 1
+            while index < len(lines) and lines[index][:1] in {" ", "+", "-"} and not lines[index].startswith("--- a/"):
+                kind, content = lines[index][0], lines[index][1:]
+                if kind in {" ", "-"}:
+                    if cursor >= len(original) or original[cursor] != content:
+                        raise ValueError(f"Pinned Mutator source does not match the compatibility patch: {relative}")
+                    cursor += 1
+                if kind in {" ", "+"}:
+                    output.append(content)
+                index += 1
+        changed[target] = "".join(output + original[cursor:]).encode("utf-8")
+    for target, content in changed.items():
+        target.write_bytes(content)
+    (source / "src/mutator/windows.py").write_bytes((folder / "windows.py").read_bytes())
+    stamp.write_text(adaptation_hash(), encoding="ascii")
 
 
 def setup(runtime: Path) -> None:
@@ -95,11 +145,12 @@ def install(runtime: Path) -> None:
         sources.append(destination)
     if not tool_python(runtime).is_file():
         venv.EnvBuilder(with_pip=True).create(runtime / "venv")
+    apply_adaptation(runtime / "sources/mutator")
     python = str(tool_python(runtime))
     subprocess.run([python, "-I", "-m", "pip", "install", "--disable-pip-version-check", "--no-input", *DEPENDENCIES], check=True)
     subprocess.run([python, "-I", "-m", "pip", "install", "--disable-pip-version-check", "--no-input", "--no-deps", *(str(p) for p in sources)], check=True)
     subprocess.run([python, "-I", "-B", "-c", "import crapper.cli, dryer.cli, mutator.cli"], check=True)
-    stamp = {"tools": {k: v[0] for k, v in TOOLS.items()}, "dependencies": list(DEPENDENCIES)}
+    stamp = {"tools": {k: v[0] for k, v in TOOLS.items()}, "dependencies": list(DEPENDENCIES), "adaptation": adaptation_hash()}
     (runtime / "ready.json").write_text(json.dumps(stamp, indent=2), encoding="utf-8")
 
 
@@ -186,11 +237,7 @@ def inspect_mutator(files: list[Path], root: Path) -> dict:
     sites = []
     for path in files:
         sites.extend(sites_in_file(path.read_text(encoding="utf-8"), path, root, path.relative_to(root).as_posix()))
-    reason = (
-        "Pinned upstream mutation workers and timeout handling do not support native Windows; an existing POSIX environment is required."
-        if os.name == "nt" else
-        "Site discovery only. Actual mutation requires an isolated project snapshot and a verified project test command; follow automated-checks.md."
-    )
+    reason = "Site discovery only. Use the separate mutate command with an independent snapshot and verified project test command; follow automated-checks.md."
     return {"status": "scan_only", "mutation_tests": "not_run", "reason": reason, "candidate_count": len(sites), "sites": [asdict(site) for site in sites]}
 
 
@@ -241,11 +288,49 @@ def inspect_project(args) -> dict:
     return report
 
 
+def mutate_snapshot(args) -> int:
+    from mutator.cli import run
+    from mutator.functions import sites_in_file
+
+    root = args.snapshot.expanduser().resolve()
+    if not root.is_dir() or (root / ".git").exists():
+        raise ValueError("Pass an independent project snapshot without Git metadata, not the original checkout")
+    if (root / "target/mutator-backup").exists():
+        raise ValueError("Old Mutator backups must not be present in the independent snapshot")
+    if os.name == "nt":
+        from mutator.windows import validate_snapshot
+        from mutator.workers import SKIP_LINK
+        validate_snapshot(root, SKIP_LINK)
+    files, excluded = select_files(root, argparse.Namespace(all=False, files=args.files))
+    if excluded or not files:
+        raise ValueError(f"Select supported owned source files; excluded: {excluded}")
+    sites = sum(len(sites_in_file(p.read_text(encoding="utf-8"), p, root, p.relative_to(root).as_posix())) for p in files)
+    if not sites:
+        raise ValueError("No mutation sites selected; no tests were executed")
+    if args.max_workers < 1:
+        raise ValueError("--max-workers must be positive")
+    diagnostics = root / "target/mutator-diagnostics"
+    before = {p.name: p.stat().st_mtime_ns for p in diagnostics.glob("*.json")}
+    result = run(["--root", str(root), "--mutate-all", "--no-coverage", "--max-workers", str(args.max_workers), "--test-command", args.test_command, "--verbose", *(str(p) for p in files)])
+    if os.name == "nt" and result in {0, 3}:
+        records = [json.loads(p.read_text(encoding="utf-8")) for p in diagnostics.glob("*.json") if p.stat().st_mtime_ns != before.get(p.name)]
+        executed = [record for record in records if not record["case"].startswith("baseline:")]
+        if not executed:
+            raise RuntimeError("No executed mutation evidence was produced")
+        print(json.dumps({"mutation_tests": "executed", "count": len(executed), "diagnostics": str(diagnostics), "classification": "Upstream killed includes nonzero exits and timeouts; inspect retained diagnostics."}))
+    return result
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest="command", required=True)
     commands.add_parser("setup", help="Install pinned tools in a dedicated user cache, never in the reviewed project.")
     commands.add_parser("status", help="Report runtime availability without installing anything.")
+    mutation = commands.add_parser("mutate", help="Run actual mutation tests in a caller-provided independent snapshot.")
+    mutation.add_argument("--snapshot", type=Path, required=True)
+    mutation.add_argument("--files", nargs="+", required=True)
+    mutation.add_argument("--test-command", required=True)
+    mutation.add_argument("--max-workers", type=int, default=1)
     inspect = commands.add_parser("inspect", help="Read-only upstream analysis; mutation discovery is explicitly not mutation testing.")
     inspect.add_argument("--root", type=Path, required=True)
     scope = inspect.add_mutually_exclusive_group(required=True)
@@ -261,13 +346,15 @@ def main() -> int:
     if args.command == "setup":
         setup(runtime)
     if args.command in {"setup", "status"}:
-        print(json.dumps({"ready": ready(runtime), "tool_python": str(tool_python(runtime)), "runtime": str(runtime), "mutator_native_execution": os.name == "posix"}, indent=2))
+        print(json.dumps({"ready": ready(runtime), "tool_python": str(tool_python(runtime)), "runtime": str(runtime), "mutator_native_execution": os.name in {"nt", "posix"}, "adaptation": adaptation_hash()}, indent=2))
         return 0
     if not ready(runtime):
         print(json.dumps({"tools": {name: {"status": "unavailable", "reason": "Run quality_tools.py setup in the host's permitted environment first."} for name in TOOLS}}))
         return 2
     if Path(sys.prefix).resolve() != (runtime / "venv").resolve():
         return subprocess.run([str(tool_python(runtime)), "-I", "-B", "-X", "utf8", str(Path(__file__).resolve()), *sys.argv[1:]]).returncode
+    if args.command == "mutate":
+        return mutate_snapshot(args)
     root = args.root.expanduser().resolve()
     if args.output and args.output.expanduser().resolve().is_relative_to(root):
         parser.error("Keep the generated report outside the reviewed project.")

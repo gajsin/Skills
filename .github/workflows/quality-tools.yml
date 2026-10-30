@@ -1,0 +1,44 @@
+name: Quality tool regressions
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '**/skills/spec-review/scripts/**'
+      - '**/skills/spec-review/patches/**'
+      - 'tests/test_mutator_windows.py'
+      - '.github/workflows/quality-tools.yml'
+  pull_request:
+    paths:
+      - '**/skills/spec-review/scripts/**'
+      - '**/skills/spec-review/patches/**'
+      - 'tests/test_mutator_windows.py'
+      - '.github/workflows/quality-tools.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  native:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+        python: ['3.11', '3.12']
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pinned tools and compatibility patch
+        run: python Codex/skills/spec-review/scripts/quality_tools.py setup
+      - name: Run execution and isolation regressions
+        run: python tests/test_mutator_windows.py -v

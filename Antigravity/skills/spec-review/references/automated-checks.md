@@ -28,8 +28,10 @@ python <skill-dir>/scripts/quality_tools.py setup
 ```
 
 Setup downloads pinned upstream 0BSD sources and installs their dependencies in a
-dedicated user cache, shared by the host editions. `SPEC_REVIEW_TOOLS_HOME` can
-select another cache location. It does not install project dependencies or alter
+dedicated user cache, shared by the host editions. A source-checked compatibility
+patch adds native Windows execution; its hash is part of the cache identity. `SPEC_REVIEW_TOOLS_HOME` can
+select another cache location. Keep the skill directory intact, including its
+`patches/` files. Setup does not install project dependencies or alter
 package manifests, lockfiles, global instructions, hooks, or system settings.
 Follow host network/write permissions. If setup is unavailable or prohibited by
 an explicit no-write request, report the missing checks; do not silently install
@@ -77,10 +79,11 @@ available. Ordinary prose edits do not need it. Inspect the test command before
 execution; a review does not authorize production writes, paid calls, dependency
 installation, or shared-resource cleanup.
 
-The pinned Mutator's execution uses POSIX symlink workers and process-group
-termination. It is not supported reliably on native Windows. Use an existing
-appropriate POSIX environment when authorized; do not install WSL, change Windows
-settings, or substitute site discovery without disclosing the limitation.
+The supplied runtime supports native Windows and the upstream POSIX execution.
+Windows workers use independent regular-file copies, including full local
+dependency payloads, and Windows Job Objects control test-process lifetimes. No WSL,
+Developer Mode, administrator rights, or additional Python dependency is required
+by this adaptation. POSIX workers retain the upstream overlay behavior.
 
 Use an independent project snapshot containing the reviewed working files,
 including relevant untracked changes. Do not run mutation execution against the
@@ -88,19 +91,44 @@ original tree: the tool can restore old backup files, and tests can write throug
 worker links. Verify snapshot files are independent copies. Keep test/build
 artifacts there, and preserve the original project and its dependencies.
 
-Use the runtime's `tool_python` from `status`; use the real project's interpreter
-and configured test command, not Mutator's interpreter by accident. Tests and
-module imports must follow the worker copy, not an absolute original source path
-or an editable install. Confirm a passing baseline and unchanged-worker behavior.
+Use the real project's interpreter and configured test command, not Mutator's
+interpreter by accident. Tests and module imports must follow the worker copy,
+not an absolute original source path or an editable install. Verify module origins
+for alias/workspace imports. Windows checks every unchanged worker before applying
+mutations; a failed worker baseline aborts without scoring those failures as killed.
 
 ```text
-<tool-python> -I -B -m mutator --root <independent-snapshot> --mutate-all --max-workers 1 --no-coverage --test-command "<verified-project-test-command>" --verbose <explicit-source-files>
+python <skill-dir>/scripts/quality_tools.py mutate --snapshot <independent-snapshot> --files src/example.py --test-command "<verified-project-test-command>"
 ```
 
-`--no-coverage` here disables coverage-based selection; it does not claim coverage.
-Current matching reports permit `--use-existing-coverage` instead. `--mutate-all`
-avoids reusing killed history when tests changed. Bound the selected files/sites
-and test command to the risk; do not turn a small review into a full test campaign.
+The separate command requires existing explicit source files and a verified test
+command. It rejects Git metadata and old backups. On Windows it checks included
+snapshot inputs and existing output paths for reparse points and hard links before the first test process;
+prepare a fresh snapshot from independent copies rather than bypassing that check.
+Installed runtimes and other external dependencies must already be suitable for
+the project. Copying workers is not an operating-system security sandbox.
+
+The test-command string uses the platform shell: `cmd.exe` on Windows, not
+PowerShell. Quote paths for that shell. The runner can discover Windows project
+interpreters under `.venv/Scripts/python.exe` or `venv/Scripts/python.exe`, but
+confirm the actual command and environment instead of assuming the tool's Python
+contains the project's dependencies.
+
+This command reruns selected mutants and disables coverage-based filtering; it
+does not claim coverage. The default is one worker. `--max-workers` can raise the
+cap when justified. Windows copies may cost disk space/time for large dependency
+trees, so keep execution scoped to the risk. Windows worker copies use unique
+directories under the system temporary directory to avoid extending deep project
+paths. Normal filesystem and project-tool path limits still apply; use a short
+local snapshot path. Windows baseline tests have a
+300-second limit; a verified longer suite can set `MUTATOR_BASELINE_TIMEOUT` to a
+positive number of seconds. Mutation timeouts retain the upstream baseline-based
+calculation. Do not turn a small review into a full test campaign.
+
+Per-mutation Windows diagnostics retain command, working directory, exit code,
+timeout and captured output under `target/mutator-diagnostics` inside the snapshot.
+Keep those artifacts local when they contain private project output. Inspect them
+when interpreting killed mutants; an execution failure is not a quality pass.
 
 Require positive executed counts. Distinguish surviving, equivalent, uncovered,
 invalid/uncompilable, and infrastructure-failed cases. The upstream tool classifies
@@ -119,4 +147,9 @@ Pinned implementations and their own 0BSD licenses:
 [Dryer](https://github.com/unclebob/dryer/tree/66ff6d21a42c04afcad89c78a80066176d1294b0),
 [Mutator](https://github.com/unclebob/mutator/tree/a5a0cb803b66e0cdb8bf471b3b08af701d424a41).
 Their sources and dependencies are fetched into the tool cache, not redistributed
-as part of this skill. `quality_tools.py` is the pack's MIT-licensed integration.
+as part of this skill. The included `patches/mutator-windows.patch` modifies
+platform integration without replacing mutation discovery or scoring. Its source
+is based on the pinned 0BSD upstream. `quality_tools.py` and `patches/windows.py`
+are the pack's MIT-licensed integration. Python and Node execution regressions are
+maintained in the repository; a passing fixture does not qualify every project or
+platform-specific test suite.

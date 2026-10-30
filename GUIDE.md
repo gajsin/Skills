@@ -72,8 +72,9 @@ its boundary. The user does not need to name Crapper, Dryer, or Mutator.
 Spec Review accounts for their applicable evidence and reports what ran, what did
 not, and why. Tool setup uses a dedicated cache, not project dependencies. Crapper
 and Dryer inspect code; Mutator site discovery is separate from executing mutation
-tests. Native Windows cannot reliably execute the pinned upstream mutation workers;
-an existing suitable POSIX environment is needed for that step. A scan, missing
+tests. The supplied runtime includes native Windows compatibility and retains the
+upstream POSIX behavior. Actual execution uses an independent snapshot and the
+project's verified test command. A scan, missing
 coverage, a metric, or an exit code does not establish correctness. Tools supplement
 the reviewer's work on requirements, architecture, and behavior.
 

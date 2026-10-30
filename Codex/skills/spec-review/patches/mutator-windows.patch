@@ -1,0 +1,143 @@
+--- a/src/mutator/workers.py
++++ b/src/mutator/workers.py
+@@ -20,6 +20,9 @@
+ from mutator.model import Site
+ from mutator.runner import Command
+ from mutator.sites import apply_site
++
++if os.name == "nt":
++    from mutator.windows import copy_worker, remove_tree, record_result, new_run_dir as windows_run_dir
+ 
+ # Build output and the worker tree itself must not be shared. A link to
+ # ``target`` would point a worker at the directory that contains the worker.
+@@ -81,6 +84,8 @@
+ 
+ 
+ def new_run_dir(root: Path) -> Path:
++    if os.name == "nt":
++        return windows_run_dir()
+     directory = root / "target" / "mutation-workers" / f"run-{uuid.uuid4()}"
+     directory.mkdir(parents=True)
+     return directory
+@@ -96,6 +101,9 @@
+ def delete_tree(path: Path) -> None:
+     """Remove a worker tree without following a link into the real project."""
+ 
++    if os.name == "nt":
++        remove_tree(path)
++        return
+     if path.is_symlink():
+         path.unlink()
+         return
+@@ -275,6 +283,10 @@
+     importers = importers_of(root, relative)
+     for index in range(count):
+         worker = base / f"worker-{index}"
++        if os.name == "nt":
++            copy_worker(root, worker, relative, original, SKIP_LINK)
++            created.append(worker)
++            continue
+         worker.mkdir(parents=True, exist_ok=True)
+         _copy_configs(worker, root, relative)
+         _link_children(worker, root, {first})
+@@ -314,11 +326,17 @@
+         return "survived"
+     destination = directory / relative
+     mutated = apply_site(original.decode("utf-8"), site.start, site.end, site.mutant)
+-    destination.write_text(mutated, encoding="utf-8")
++    destination.write_bytes(mutated.encode("utf-8"))
+     try:
+         result = runner.run(command, mapped_cwd(directory, root, cwd), timeout)
++    except Exception as error:
++        if os.name == "nt":
++            record_result(root, directory, site.mutation_id, command, mapped_cwd(directory, root, cwd), error=error)
++        raise
+     finally:
+         destination.write_bytes(original)
++    if os.name == "nt":
++        record_result(root, directory, site.mutation_id, command, mapped_cwd(directory, root, cwd), result=result)
+     if result.timed_out or result.code != 0:
+         return "killed"
+     return "survived"
+@@ -429,6 +447,13 @@
+         directories = create_workers(
+             base, root, relative, original, worker_count(len(sites), max_workers)
+         )
++        if os.name == "nt":
++            for directory in directories:
++                worker_cwd = mapped_cwd(directory, root, cwd)
++                baseline = runner.run(command, worker_cwd, timeout)
++                record_result(root, directory, "baseline:" + str(directory), command, worker_cwd, result=baseline)
++                if baseline.timed_out or baseline.code != 0:
++                    raise RuntimeError(f"Unchanged worker baseline failed in {worker_cwd}:\n{baseline.output}")
+         _run_all(
+             directories,
+             sites,
+--- a/src/mutator/runner.py
++++ b/src/mutator/runner.py
+@@ -67,7 +67,7 @@
+ 
+     if isinstance(command, str):
+         return command
+-    return " ".join(shlex.quote(part) for part in command)
++    return subprocess.list2cmdline(command) if os.name == "nt" else " ".join(shlex.quote(part) for part in command)
+ 
+ 
+ class CommandRunner:
+@@ -88,6 +88,11 @@
+         environment = os.environ.copy()
+         environment["PYTHONDONTWRITEBYTECODE"] = "1"
+         _prefer_worker_sources(cwd, environment)
++        if os.name == "nt":
++            from mutator.windows import run_command
++            environment["PYTHONUTF8"] = "1"
++            code, timed_out, output = run_command(command, cwd, timeout, environment)
++            return CommandResult(code=code, timed_out=timed_out, seconds=time.monotonic() - started, output=output)
+         try:
+             process = subprocess.Popen(
+                 command,
+@@ -158,7 +163,8 @@
+     """
+ 
+     for name in (".venv", "venv"):
+-        candidate = (directory / name / "bin" / "python").absolute()
++        executable = "Scripts/python.exe" if os.name == "nt" else "bin/python"
++        candidate = (directory / name / executable).absolute()
+         if candidate.is_file() and os.access(candidate, os.X_OK):
+             return str(candidate)
+     return sys.executable
+@@ -245,4 +251,8 @@
+     plan = _PLANS.get(language)
+     if plan is None:
+         return ["false"], root
+-    return plan(root, source)
++    command, directory = plan(root, source)
++    if os.name == "nt" and language in {"clojure", "java", "typescript"}:
++        # These generated arguments are fixed tool flags; Windows tools can be .cmd launchers.
++        return subprocess.list2cmdline(command), directory
++    return command, directory
+--- a/src/mutator/engine.py
++++ b/src/mutator/engine.py
+@@ -3,6 +3,8 @@
+ from __future__ import annotations
+ 
+ import sys
++import os
++import math
+ from pathlib import Path
+ 
+ from mutator.crapper_link import ensure_crapper
+@@ -191,7 +193,12 @@
+ def _remember_baseline(baselines, cache_key, runner, command: Command, cwd: Path) -> None:
+     if cache_key in baselines:
+         return
+-    baseline = runner.run(command, cwd, None)
++    timeout = None
++    if os.name == "nt":
++        timeout = float(os.environ.get("MUTATOR_BASELINE_TIMEOUT", "300"))
++        if not math.isfinite(timeout) or timeout <= 0:
++            raise ValueError("MUTATOR_BASELINE_TIMEOUT must be a positive finite number")
++    baseline = runner.run(command, cwd, timeout)
+     if baseline.code != 0:
+         tail = "\n".join(baseline.output.splitlines()[-20:])
+         baselines[cache_key] = (False, baseline.seconds, tail)

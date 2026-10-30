@@ -150,9 +150,9 @@ class MutationTests(unittest.TestCase):
         self.python_project()
         venv.EnvBuilder(with_pip=False).create(self.root / ".venv")
         expected = self.root / ".venv/Scripts/python.exe"
-        self.assertEqual(_project_interpreter(self.root), str(expected))
+        self.assertTrue(Path(_project_interpreter(self.root)).samefile(expected))
         command, cwd = test_plan(self.root, self.root / "app.py", "python", None)
-        self.assertEqual(command[0], str(expected))
+        self.assertTrue(Path(command[0]).samefile(expected))
         from mutator.runner import CommandRunner
         self.assertEqual(CommandRunner().run(command, cwd, 10).code, 0)
 

@@ -32,7 +32,7 @@ ORIGINS = {
     **{name: 'https://github.com/greensock/gsap-skills/tree/aed9cfd3277740755f6bfc1155c7aa645403b760'
        for name in ['gsap-react', 'gsap-scrolltrigger']},
     **{name: 'https://github.com/gajsin/skills' for name in
-       ['architecture-first', 'model-provider-qualification', 'logo-interview']},
+       ['architecture-first', 'model-provider-qualification', 'logo-interview', 'visual-explainer']},
 }
 SKIP_DIRS = {'.git', '.cache', '__pycache__', 'node_modules', '.venv'}
 

@@ -28,6 +28,7 @@ and capabilities. Host-specific upstream builds may also differ.
 | `gsap-scrolltrigger` | Implement scroll-linked website animation with GSAP ScrollTrigger. |
 | `gsap-react` | Set up GSAP in React or Next.js with scoped animations and cleanup. |
 | `logo-interview` | Find a logo direction through an interview, a moodboard, and SVG studies. |
+| `visual-explainer` | Author SVG illustrations and diagrams directly in code, without image-generation services; use the bundled monochrome design and animate when requested. |
 | `model-provider-qualification` | Qualify an LLM model and provider route with cheap canaries before a paid pipeline run. |
 
 How the close neighbours differ and how to combine skills: [GUIDE.md](GUIDE.md).
@@ -116,7 +117,7 @@ excluded. Individual skills can also be installed directly from the public repos
 
 | Skills | License | Origin |
 |---|---|---|
-| architecture-first, model-provider-qualification, logo-interview | MIT | Original, © gajsin |
+| architecture-first, model-provider-qualification, logo-interview, visual-explainer | MIT | Original, © gajsin |
 | diagnosing-bugs, spec-review, codebase-design, grilling, retro | MIT | Adapted from [mattpocock/skills](https://github.com/mattpocock/skills) |
 | ponytail | MIT | Adapted from [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail) |
 | humanizer | MIT | Adapted from [blader/humanizer](https://github.com/blader/humanizer) |
@@ -127,3 +128,7 @@ excluded. Individual skills can also be installed directly from the public repos
 Every skill directory contains its license and notices; keep them when you copy or
 redistribute a skill. `scripts/` is MIT. Linked reference images and articles keep
 their own rights.
+
+Visual Explainer bundles Martian Mono separately under OFL-1.1; keep its
+[font notice](Codex/skills/visual-explainer/NOTICE.md) and `assets/fonts/OFL.txt`.
+Its instructions remain MIT. St Marie Thin is not distributed in the pack.

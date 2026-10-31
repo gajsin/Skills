@@ -37,6 +37,7 @@ every workflow.
 | `gsap-react` | GSAP is selected for React/Next.js | Scoped setup, lifecycle handling, and cleanup | No migration of a suitable existing stack just because the skill was invoked |
 | `gsap-scrolltrigger` | GSAP is selected for scroll-linked animation | ScrollTrigger implementation and layout/cleanup checks | No dependency or smooth-scroll library is implied by the invocation |
 | `logo-interview` | Find a logo direction through an interview and visual comparison | Agreed brief, viewed moodboard/direction, authorized studies or exports | Preserve originals and decision levels; no automatic site changes |
+| `visual-explainer` | Explain an idea through an authored SVG illustration or diagram | Editable SVG and requested exports in the bundled monochrome design; animation when requested | No image-generation services or bitmap wrappers; no automatic UI changes or video production |
 | `model-provider-qualification` | Add or change an LLM model/provider route | Compatibility evidence, faithful canaries, qualification verdict | Scoped tests/integration; paid calls need existing authorization or an agreed cap; no automatic full paid run or deployment |
 
 ## Engineering skills with different jobs
@@ -94,6 +95,23 @@ the reviewer's work on requirements, architecture, and behavior.
   for its reader. A warm or detailed document remains warm or detailed when requested;
   concise reporting does not flatten the document.
 
+## Explanatory visuals
+
+Use `visual-explainer` for a visual explanation of an idea, rather than a logo
+direction (`logo-interview`) or interface work (`impeccable`). Its bundled design
+system is the default for every subject: monochrome paper/ink, Martian Mono,
+flat surfaces, and restrained motion. The metaphor and composition change with
+the subject; explicit user design requirements can override the default.
+
+The skill includes Martian Mono under OFL-1.1, separately from its MIT
+instructions. Keep the font notice with redistributed font files. St Marie Thin
+is an optional project-supplied Latin display face, not a bundled dependency.
+All artwork is authored directly as SVG geometry and text. Imagegen and other
+image-generation services are outside this workflow. PNG is a raster export of
+the SVG using an available renderer; the SVG master remains editable. Static
+work does not require Hyperframes. Animation is a requested branch and needs an
+available renderer for video export.
+
 ## Writing without extra setup
 
 One invocation and the task are enough: `$humanizer $caveman Briefly describe what
@@ -142,6 +160,8 @@ Examples use Codex's `$`; replace it with `/` in Claude Code or Antigravity.
 | UI audit | `$impeccable audit the checkout form; report findings without product fixes.` |
 | Scroll animation in React | `$gsap-react $gsap-scrolltrigger Implement this agreed animation using the existing GSAP setup.` |
 | Logo direction | `$logo-interview Help me find a logo direction through an interview and visual board.` |
+| Explanatory illustration | `$visual-explainer Explain this idea with a finished illustration in the bundled monochrome design system.` |
+| Animated explanation | `$visual-explainer Animate this process; preserve its meaning and use the available video workflow.` |
 | Edit prose | `$humanizer Make this text natural; preserve its facts and voice.` |
 | Short session summary | `$humanizer $caveman Briefly describe what we did this session.` |
 | Provider change | `$model-provider-qualification Qualify this route within the agreed request cap before the full paid run.` |

@@ -34,8 +34,7 @@ every workflow.
 | `caveman` | Short, dry, grammatical agent replies | Session mode for concise wording | Preserves requested depth, facts, uncertainty, and required outputs |
 | `humanizer` | Write, edit, or summarize prose from supplied facts and context | Natural text in the intended voice | No setup form; preserve relevant facts and material limits; only authorized file edits |
 | `impeccable` | Build, assess, or refine a UI | Depends on the selected command | Build/refine edits the UI; critique/audit assess it and may write review artifacts |
-| `gsap-react` | GSAP is selected for React/Next.js | Scoped setup, lifecycle handling, and cleanup | No migration of a suitable existing stack just because the skill was invoked |
-| `gsap-scrolltrigger` | GSAP is selected for scroll-linked animation | ScrollTrigger implementation and layout/cleanup checks | No dependency or smooth-scroll library is implied by the invocation |
+| `gsap` | GSAP is selected for a website animation | Scoped implementation; React and ScrollTrigger references loaded as needed | No migration of a suitable stack or dependency installation merely because the skill was invoked |
 | `logo-interview` | Find a logo direction through an interview and visual comparison | Agreed brief, viewed moodboard/direction, authorized studies or exports | Preserve originals and decision levels; no automatic site changes |
 | `visual-explainer` | Explain an idea through an authored SVG illustration or diagram | Editable SVG and requested exports in the bundled monochrome design; animation when requested | No image-generation services or bitmap wrappers; no automatic UI changes or video production |
 | `model-provider-qualification` | Add or change an LLM model/provider route | Compatibility evidence, faithful canaries, qualification verdict | Scoped tests/integration; paid calls need existing authorization or an agreed cap; no automatic full paid run or deployment |
@@ -88,12 +87,25 @@ the reviewer's work on requirements, architecture, and behavior.
   Reuse its settled answers; do not start a second generic questionnaire. Use
   Grilling separately for unresolved product requirements outside that interview.
 - **Impeccable + GSAP:** Impeccable handles visual intent and UI quality. GSAP
-  skills handle the selected animation technology. Use both GSAP skills for
-  scroll-driven animation in React; neither forces GSAP onto another suitable stack.
+  handles the selected animation technology and loads its React and ScrollTrigger
+  references when needed; it does not force GSAP onto another suitable stack.
 - **Caveman + Humanizer:** Caveman shortens replies and requested prose while
   preserving meaning and the appropriate tone. Humanizer makes the wording natural
   for its reader. A warm or detailed document remains warm or detailed when requested;
   concise reporting does not flatten the document.
+
+## GSAP website animation
+
+Invoke `gsap` once. Its entrypoint selects `references/react.md` for React/Next.js
+and `references/scrolltrigger.md` for scroll-driven behavior. A scroll animation
+in React needs both; a plain GSAP tween needs neither unless their subject applies.
+The references are supporting files within the same skill, not separate skills
+you must invoke. Keep the whole directory when installing it.
+
+This replaces the separate `gsap-react` and `gsap-scrolltrigger` skills. After
+installing `gsap`, remove the old two directories to avoid stale choices. The
+skill implements the agreed website animation; `visual-explainer` remains the
+entrypoint for authored explanatory illustrations and video deliverables.
 
 ## Explanatory visuals
 
@@ -158,7 +170,7 @@ Examples use Codex's `$`; replace it with `/` in Claude Code or Antigravity.
 | Audit an existing project | `$spec-review Audit the entire project against its requirements and standards; report findings without fixes.` |
 | Hard bug | `$diagnosing-bugs $ponytail Reproduce and fix this failure. Add Architecture First if the fix requires a substantial design change.` |
 | UI audit | `$impeccable audit the checkout form; report findings without product fixes.` |
-| Scroll animation in React | `$gsap-react $gsap-scrolltrigger Implement this agreed animation using the existing GSAP setup.` |
+| Scroll animation in React | `$gsap Implement this agreed scroll animation using the existing GSAP setup.` |
 | Logo direction | `$logo-interview Help me find a logo direction through an interview and visual board.` |
 | Explanatory illustration | `$visual-explainer Explain this idea with a finished illustration in the bundled monochrome design system.` |
 | Animated explanation | `$visual-explainer Animate this process; preserve its meaning and use the available video workflow.` |

@@ -27,6 +27,6 @@
 
 ## Скиллы
 
-Личные скиллы — только ручной вызов. Если подходит, предложи: `/architecture-first`, `/ponytail`, `/caveman`, `/diagnosing-bugs`, `/grilling`, `/codebase-design`, `/spec-review`, `/retro`, `/impeccable`, `/gsap-scrolltrigger`, `/gsap-react`, `/humanizer`, `/logo-interview`, `/model-provider-qualification`.
+Личные скиллы — только ручной вызов. Если подходит, предложи: `/architecture-first`, `/ponytail`, `/caveman`, `/diagnosing-bugs`, `/grilling`, `/codebase-design`, `/spec-review`, `/retro`, `/impeccable`, `/gsap`, `/humanizer`, `/logo-interview`, `/model-provider-qualification`.
 
 Требования конкретного стека (Docker, логирование, мониторинг, SDK) живут в CLAUDE.md проекта.

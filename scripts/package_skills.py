@@ -30,7 +30,7 @@ ORIGINS = {
     'humanizer': 'https://github.com/blader/humanizer/tree/225a6f39ac85f76ee48dbad772ea4abe4ed6c9d8',
     'impeccable': 'https://github.com/pbakaus/impeccable/tree/936867543ac2576920d663cc9803597f6044f3ac',
     **{name: 'https://github.com/greensock/gsap-skills/tree/aed9cfd3277740755f6bfc1155c7aa645403b760'
-       for name in ['gsap-react', 'gsap-scrolltrigger']},
+       for name in ['gsap']},
     **{name: 'https://github.com/gajsin/skills' for name in
        ['architecture-first', 'model-provider-qualification', 'logo-interview', 'visual-explainer']},
 }

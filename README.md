@@ -25,8 +25,7 @@ and capabilities. Host-specific upstream builds may also differ.
 | `caveman` | Session mode: short, dry, grammatical replies without losing facts. |
 | `humanizer` | Write or edit natural prose and concise session summaries from the available context, preserving facts and the intended voice. |
 | `impeccable` | Design, critique, audit, and polish user interfaces (by [pbakaus/impeccable](https://github.com/pbakaus/impeccable)). |
-| `gsap-scrolltrigger` | Implement scroll-linked website animation with GSAP ScrollTrigger. |
-| `gsap-react` | Set up GSAP in React or Next.js with scoped animations and cleanup. |
+| `gsap` | Implement GSAP website animation; read React lifecycle and ScrollTrigger guidance only when relevant. |
 | `logo-interview` | Find a logo direction through an interview, a moodboard, and SVG studies. |
 | `visual-explainer` | Author SVG illustrations and diagrams directly in code, without image-generation services; use the bundled monochrome design and animate when requested. |
 | `model-provider-qualification` | Qualify an LLM model and provider route with cheap canaries before a paid pipeline run. |
@@ -79,6 +78,10 @@ working installations do not need to be moved merely to follow this table.
 When installing Impeccable for Claude Code, also copy `Claude Code/agents/*`
 into `~/.claude/agents/`.
 
+`gsap` replaces `gsap-react` and `gsap-scrolltrigger`. Install the complete new
+`gsap/` directory, verify it is available, then remove those two old directories
+from your personal skills location. Copying a new pack alone does not remove them.
+
 The following examples install the full Claude Code pack from a repository checkout:
 
 ```bash
@@ -121,7 +124,7 @@ excluded. Individual skills can also be installed directly from the public repos
 | diagnosing-bugs, spec-review, codebase-design, grilling, retro | MIT | Adapted from [mattpocock/skills](https://github.com/mattpocock/skills) |
 | ponytail | MIT | Adapted from [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail) |
 | humanizer | MIT | Adapted from [blader/humanizer](https://github.com/blader/humanizer) |
-| gsap-react, gsap-scrolltrigger | MIT | Adapted from [greensock/gsap-skills](https://github.com/greensock/gsap-skills) |
+| gsap | MIT | Consolidated from [greensock/gsap-skills](https://github.com/greensock/gsap-skills); original license retained |
 | caveman | Apache-2.0, with a retained MIT notice | Adapted from [juliusbrussee/caveman](https://github.com/juliusbrussee/caveman) |
 | impeccable | Apache-2.0; embedded references keep their MIT notices | Adapted from [pbakaus/impeccable](https://github.com/pbakaus/impeccable) and credited sources |
 

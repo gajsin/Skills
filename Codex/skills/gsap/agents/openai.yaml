@@ -1,0 +1,6 @@
+interface:
+  display_name: "GSAP"
+  short_description: "Website animation with React and scroll guidance"
+  default_prompt: "Use $gsap for the agreed GSAP website animation in this project."
+policy:
+  allow_implicit_invocation: false

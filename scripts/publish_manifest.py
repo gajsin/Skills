@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2026 gajsin
-"""Build host archives and skills.json with complete public catalog metadata."""
+"""Build the three host archives and skills.json, the manifest that gajsin.tech reads from the release."""
 from pathlib import Path
 import argparse
 import json

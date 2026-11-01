@@ -1,21 +1,27 @@
-# Правила для CLAUDE.md проекта
+# Project-specific rule examples
 
-Справочник возможных требований. Сам не загружается, и пункты из него не переносятся автоматически: наличие React не требует Zustand, наличие сервера не требует Docker. Пункт попадает в `CLAUDE.md` проекта, только когда проект его требует или пользователь это подтвердил.
+Optional examples, not global requirements. Select and adapt only the rules
+supported by the project's requirements or the user's instructions. No framework,
+library, service, or deployment platform is required merely by this document.
 
-## Фронтенд
+## Frontend
 
-- Локальное состояние остаётся локальным; общее состояние в React — Zustand; кэш — только с понятным обновлением и сбросом.
+- Keep local state local. Use the project's selected approach for shared state.
+  Cache only with a defined update and invalidation strategy.
 
-## Сервер и продакшен
+## Services and production
 
-- Логирование структурированное: важные операции, внешние запросы, ошибки, время выполнения, изменения состояния, идентификатор запроса. Без секретов и спама.
-- Ошибки, контекст, версия приложения и критичные сценарии уходят в Sentry или существующий аналог.
-- Процесс восстанавливается после падения: restart policy и healthcheck.
-- Docker собирается без кэша слоёв; после деплоя удаляются неиспользуемые образы, контейнеры и build cache.
-- Большие миграции — поэтапно, каждый этап проверяем и обратим.
-- Критичные пользовательские сценарии покрыты end-to-end тестами.
+- Record useful operational events, errors, timing, and request identifiers
+  without secrets or noisy repetition. Reuse existing diagnostics and monitoring.
+- Define recovery and health checks where service availability requires them.
+- Choose build-cache and deployment-cleanup policies for the actual environment.
+  Do not delete shared resources or require clean builds without a reason.
+- Make substantial migrations staged and recoverable. Cover critical user
+  behavior with appropriate integration or end-to-end checks.
 
-## LLM
+## LLM applications
 
-- Обычный вызов модели — напрямую через OpenAI SDK. LangGraph — только для многошаговой логики с состоянием, ветвлениями, циклами или инструментами.
-- Промпты — это код: задача, контекст, ограничения, инструменты, формат результата, критерий успеха. Общие промпты хранятся централизованно.
+- Use the chosen provider's SDK or the project's existing integration. Introduce
+  an orchestration framework only when the workflow needs its capabilities.
+- Treat prompts as maintained code: define the task, context, constraints, tools,
+  output format, and success criteria. Keep shared prompts in one source of truth.

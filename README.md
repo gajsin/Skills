@@ -40,9 +40,9 @@ Claude Code/skills/    skills for Claude Code
 Claude Code/agents/    Impeccable helper agents for Claude Code
 Antigravity/skills/    skills for Antigravity
 Codex/AGENTS.md, Antigravity/GEMINI.md, Claude Code/CLAUDE.md
-                       the author's own always-on rules (Russian), optional
+                       optional reusable agent-rule examples
 Claude Code/PROJECT-RULES.md
-                       the author's stack preferences for per-project rules
+                       optional examples of project-specific requirements
 GUIDE.md               choosing and combining skills
 catalog.json           public Russian skill cards and their display order
 scripts/               builder for release archives
@@ -97,17 +97,18 @@ Copy-Item -Recurse -Force "Claude Code\skills\*" "$env:USERPROFILE\.claude\skill
 Copy-Item -Force "Claude Code\agents\*" "$env:USERPROFILE\.claude\agents"
 ```
 
-The author's global rules files are not required by any skill. Read them before
-use: copying one replaces your own `AGENTS.md`, `GEMINI.md`, or `CLAUDE.md`.
+The optional agent-rule examples are not required by any skill. Review and adapt
+them before use; copying one replaces your existing `AGENTS.md`, `GEMINI.md`, or
+`CLAUDE.md`.
 
 Impeccable downloads its official engine, with checksum verification, on first use.
 
 ## Release archives
 
-### Public cards on gajsin.tech
+### Catalog metadata
 
-`catalog.json` is the single source for each skill's Russian card and the order
-of cards on the website. It is keyed by the skill directory name. Every entry
+`catalog.json` is the single source for each skill's Russian card and its display
+order in catalog consumers. It is keyed by the skill directory name. Every entry
 must contain four non-empty text fields:
 
 | Field | Meaning |
@@ -139,13 +140,12 @@ Check the generated `dist/skills.json`: names, order, categories, descriptions,
 results, boundaries, and all three packs. The builder rejects missing or obsolete
 cards, missing fields, and empty values before creating archives. Do not commit
 `dist/`. Use a clear commit title and body describing the actual user-facing
-change: the website's journal displays that text.
+change so downstream changelogs can use that text.
 
 Pushing to `main` runs `.github/workflows/publish.yml`, which publishes the packs
-and complete cards in the `skills` release. The portfolio reads that manifest
-with a five-minute cache. Routine skill/card updates need no portfolio commit or
-deployment. Wait for the successful workflow and verify the released manifest;
-the refresh is request-driven, not an immediate background push to the site.
+and complete cards in the `skills` release. Wait for the successful workflow and
+verify the released manifest and archives. Consumers may cache the manifest;
+their refresh policy is independent of the release build.
 
 Build a source-only archive per host with Python 3 (standard library only):
 
@@ -155,9 +155,9 @@ python scripts/package_skills.py --platform claude --output dist/claude-code-ski
 python scripts/package_skills.py --platform antigravity --output dist/antigravity-skills.zip
 ```
 
-Archives provide optional bulk downloads for the website and offline installation.
+Archives provide optional bulk downloads and offline installation.
 Each holds the skills (and, for Claude Code, the agents), a README with installation,
-the skill guide, and a license table. The author's global rules and Git history are
+the skill guide, and a license table. Optional global-rule examples and Git history are
 excluded. Individual skills can also be installed directly from the public repository.
 
 ## Licenses

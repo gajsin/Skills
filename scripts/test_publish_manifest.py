@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2026 gajsin
-"""Protect the public card contract used by the portfolio's release reader."""
+"""Protect the public card contract in the release manifest."""
 from pathlib import Path
 from tempfile import TemporaryDirectory
 import json

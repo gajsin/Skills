@@ -99,7 +99,8 @@ packaging material. Each skill retains its own license; this bundle does not
 relicense third-party work. Linked external images and material retain their rights.
 Impeccable may download its official engine with checksum verification on first use.
 
-Personal global instructions, internal reports, caches, and Git history are excluded.
+Optional global-rule examples, repository maintenance files, caches, and Git history
+are excluded.
 No Figma or Pinterest account is required. Visual tools depend on the active host.
 Skills guide behavior; they do not guarantee correctness or production readiness.
 

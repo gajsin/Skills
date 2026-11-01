@@ -1,17 +1,23 @@
-# Publishing skill updates
+# Working principles
 
-- When adding or improving skills, use focused commits with a clear Russian
-  subject and a short description for the portfolio's update journal: affected
-  skills, concrete changes, and their purpose. Describe completed changes; distinguish
-  verification from untested behavior and avoid claims of guaranteed results.
-- For future updates, preserve published history with ordinary commits and pushes.
-  Do not amend, squash, or force-push published history unless the user explicitly
-  asks to rewrite it. Keep unrelated changes outside the skill update.
-- Keep `catalog.json` synchronized with skill additions, removals, renames, and
-  behavior changes: review `group`, `use`, `result`, and `edits` in the same commit.
-  The site's description and license come from `Claude Code/skills/<name>/SKILL.md`.
-  Run the checks in README's "Public cards on gajsin.tech" section before pushing.
-- Validate the affected host editions and preserve their invocation policies.
-  Confirm that the publication workflow succeeds and the `skills` release archives
-  and manifest match the published commit. The site refreshes its cache without a
-  portfolio deployment; do not edit the portfolio merely to publish a skill update.
+- Read the request and relevant materials before changing anything. Trace the
+  affected behavior; reproduce bugs when safe and practical, then fix the cause.
+- Make the smallest complete change that satisfies the request. Reuse existing
+  code, standard tools, and installed dependencies. Preserve unrelated content,
+  design, structure, and behavior; report other issues separately.
+- Design for confirmed requirements and known development plans. Keep related
+  behavior together and interfaces small. Avoid speculative layers, temporary
+  workarounds, duplicate sources of truth, and dead code.
+- Validate external inputs and protect data and secrets. Handle errors explicitly;
+  do not hide failures behind fallback results. Consider concurrency and retries
+  where shared state is involved. Keep useful diagnostics without exposing secrets.
+- Use the smallest sufficient verification and required project checks. Expand
+  testing or environment setup only to address a concrete remaining risk.
+- Apply skill principles yourself. Choose independent review by risk or explicit
+  request; verify findings and remain responsible for the result.
+- Respond concisely in the requested language. Distinguish facts from assumptions,
+  report relevant verification limits, and do not claim unsupported success.
+- Finish within the authorized scope. Remove your unnecessary temporary files;
+  preserve other people's work and shared resources.
+- Load skills from this pack only when explicitly requested; apply these
+  principles throughout the task.

@@ -10,6 +10,24 @@ import subprocess
 from package_skills import LOCATIONS, ORIGINS, PLATFORMS, build_bundle
 
 REPO = Path(__file__).resolve().parents[1]
+CARD_FIELDS = {'group', 'use', 'result', 'edits'}
+
+
+def load_catalog(names):
+    """Require one complete public card per published skill; preserve the catalogue order."""
+    catalog = json.loads((REPO / 'catalog.json').read_text(encoding='utf-8'))
+    if not isinstance(catalog, dict):
+        raise ValueError('catalog.json must contain an object keyed by skill name')
+    missing, obsolete = sorted(set(names) - set(catalog)), sorted(set(catalog) - set(names))
+    if missing or obsolete:
+        raise ValueError(f'catalog.json does not match the skills: missing={missing}, obsolete={obsolete}')
+    for name, card in catalog.items():
+        if not isinstance(card, dict) or set(card) != CARD_FIELDS:
+            raise ValueError(f'{name}: the catalogue card must have group, use, result and edits')
+        for key, value in card.items():
+            if not isinstance(value, str) or not value.strip():
+                raise ValueError(f'{name}: catalogue {key} must be non-empty text')
+    return catalog
 
 
 def git(*args):
@@ -26,6 +44,14 @@ def field(text, key, name):
 
 def build_manifest(output, download_base):
     commit, date = git('log', '-1', '--format=%H %cs').split(' ')
+    folder = REPO / PLATFORMS['claude'] / 'skills'
+    names = sorted(path.name for path in folder.iterdir() if (path / 'SKILL.md').is_file())
+    catalog = load_catalog(names)
+    skills = []
+    for name, card in catalog.items():
+        text = (folder / name / 'SKILL.md').read_text(encoding='utf-8')
+        skills.append({'name': name, 'description': field(text, 'description', name),
+                       'license': field(text, 'license', name), 'origin': ORIGINS[name], **card})
     packs = []
     for platform, title in PLATFORMS.items():
         name = f'gajsin-skills-{platform}.zip'
@@ -33,13 +59,6 @@ def build_manifest(output, download_base):
         packs.append({'platform': platform, 'title': title, 'url': f'{download_base}/{name}',
                       'bytes': result['bytes'], 'sha256': result['sha256'],
                       'location': LOCATIONS[platform], 'invoke': '$' if platform == 'codex' else '/'})
-    folder = REPO / PLATFORMS['claude'] / 'skills'
-    names = sorted(path.name for path in folder.iterdir() if (path / 'SKILL.md').is_file())
-    skills = []
-    for name in names:
-        text = (folder / name / 'SKILL.md').read_text(encoding='utf-8')
-        skills.append({'name': name, 'description': field(text, 'description', name),
-                       'license': field(text, 'license', name), 'origin': ORIGINS[name]})
     # One journal entry per day: which skills changed in any host edition.
     updates = []
     log = git('log', '--date=short', '--format=%x1e%cs', '--name-only', '--',

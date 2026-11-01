@@ -44,6 +44,7 @@ Codex/AGENTS.md, Antigravity/GEMINI.md, Claude Code/CLAUDE.md
 Claude Code/PROJECT-RULES.md
                        the author's stack preferences for per-project rules
 GUIDE.md               choosing and combining skills
+catalog.json           public Russian skill cards and their display order
 scripts/               builder for release archives
 ```
 
@@ -102,6 +103,49 @@ use: copying one replaces your own `AGENTS.md`, `GEMINI.md`, or `CLAUDE.md`.
 Impeccable downloads its official engine, with checksum verification, on first use.
 
 ## Release archives
+
+### Public cards on gajsin.tech
+
+`catalog.json` is the single source for each skill's Russian card and the order
+of cards on the website. It is keyed by the skill directory name. Every entry
+must contain four non-empty text fields:
+
+| Field | Meaning |
+|---|---|
+| `group` | Category, for example `Дизайн и анимация` |
+| `use` | When to use the skill; the short summary beside its name |
+| `result` | What the user receives |
+| `edits` | Boundaries: what it changes, preserves, or requires a separate request |
+
+The English `description` and `license` come from the Claude Code edition's
+`SKILL.md` frontmatter; provenance comes from `ORIGINS` in
+`scripts/package_skills.py`. Do not duplicate these fields in `catalog.json`.
+
+When changing a skill, check its card against the actual instructions and update
+the relevant fields in the same commit. For a new skill, add a complete card in
+the desired position, the host editions, license, and provenance. When removing
+or renaming a skill, remove or rename its card as well. Keep statements factual:
+do not invent capabilities, guarantees, or permissions. Match shared cards to the
+behavior of the host editions; mention material differences when they exist.
+
+Before pushing, run:
+
+```sh
+python -m unittest discover -s scripts -p 'test_*.py'
+python scripts/publish_manifest.py --output dist --download-base https://github.com/gajsin/Skills/releases/download/skills
+```
+
+Check the generated `dist/skills.json`: names, order, categories, descriptions,
+results, boundaries, and all three packs. The builder rejects missing or obsolete
+cards, missing fields, and empty values before creating archives. Do not commit
+`dist/`. Use a clear commit title and body describing the actual user-facing
+change: the website's journal displays that text.
+
+Pushing to `main` runs `.github/workflows/publish.yml`, which publishes the packs
+and complete cards in the `skills` release. The portfolio reads that manifest
+with a five-minute cache. Routine skill/card updates need no portfolio commit or
+deployment. Wait for the successful workflow and verify the released manifest;
+the refresh is request-driven, not an immediate background push to the site.
 
 Build a source-only archive per host with Python 3 (standard library only):
 

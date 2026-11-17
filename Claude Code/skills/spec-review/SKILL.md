@@ -128,6 +128,11 @@ If the spec is missing, skip the Spec sub-agent and note this in the final repor
 
 Verify reported findings against the reviewed source and applicable requirements. For a project audit, use the selected files and flows wherever the reviewer briefs refer to a diff. Remove unsupported claims or identify unresolved uncertainty. Present confirmed findings under `## Standards` and `## Spec`, retaining their evidence. Keep the axes separate; strength on one axis does not cancel a failure on the other (see _Why two axes_).
 
+For a security finding, trace the untrusted entry point through the controls that
+actually run to the unauthorized effect. Identify who can reach it and what
+changes or is exposed. If the conclusion depends on an unverified configuration or
+runtime fact, state that fact and mark the finding as unconfirmed.
+
 Add a compact tool-evidence table with scope, result, and limits for Crapper, Dryer,
 and Mutator; explicitly distinguish a mutation scan from executed tests.
 

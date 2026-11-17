@@ -81,6 +81,11 @@ Verification of changed behavior, validation at trust boundaries, explicit error
 handling, required diagnostics, security controls, accessibility, and protections
 against data loss are safeguards, not optional complexity.
 
+For a high-risk change, assume the proposed design shipped and broke a working
+scenario. Trace up to three plausible causes through the existing flow or its
+dependencies. Include a focused pre-release check for each in the plan, reusing
+existing coverage where it verifies the failure path.
+
 ## Implementation loop
 
 1. Record the request’s acceptance criteria, no-touch areas, and protected data.

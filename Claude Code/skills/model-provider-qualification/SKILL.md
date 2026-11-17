@@ -78,7 +78,7 @@ Separate these cases:
 - transient transport failure or rate limit;
 - application or pipeline defect.
 
-Retry only errors classified as transient, using a bounded policy. A generic provider `400` is provider-specific evidence: exclude or switch that provider rather than repeating the same unpinned request and hoping routing changes. Record the provider on both successful and failed attempts.
+Retry only errors classified as transient, using a bounded policy. For a generic HTTP 400, inspect the error body and the actual outgoing payload before attributing the failure to a provider. Correct malformed requests and exclude a route only when provider incompatibility is confirmed. If the cause remains unknown, report that uncertainty. Record the provider on both successful and failed attempts.
 
 Preserve recoverable state and report the failed gate. Do not weaken tools, prompts, image evidence, or acceptance checks merely to obtain a green response.
 

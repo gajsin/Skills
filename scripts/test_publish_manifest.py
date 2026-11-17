@@ -19,10 +19,15 @@ class CatalogueTests(unittest.TestCase):
         patcher.start()
         self.addCleanup(patcher.stop)
         self.card = {'group': 'Дизайн', 'use': 'Задача', 'result': 'Результат', 'edits': 'Границы'}
+        for edition in publish_manifest.PLATFORMS.values():
+            for name in ('first', 'second'):
+                skill = self.root / edition / 'skills' / name
+                skill.mkdir(parents=True)
+                (skill / 'SKILL.md').touch()
 
-    def read(self, value, names=('first', 'second')):
+    def read(self, value):
         (self.root / 'catalog.json').write_text(json.dumps(value), encoding='utf-8')
-        return publish_manifest.load_catalog(names)
+        return publish_manifest.load_catalog()
 
     def test_release_keeps_editorial_order_and_complete_cards(self):
         cards = {'second': self.card, 'first': {**self.card, 'group': 'Новая категория'}}
@@ -34,6 +39,11 @@ class CatalogueTests(unittest.TestCase):
         for cards in ({'first': self.card}, {'first': self.card, 'second': self.card, 'removed': self.card}):
             with self.subTest(cards=cards), self.assertRaisesRegex(ValueError, 'does not match'):
                 self.read(cards)
+
+    def test_missing_skill_in_non_claude_pack_blocks_publication(self):
+        (self.root / 'Antigravity/skills/second/SKILL.md').unlink()
+        with self.assertRaisesRegex(ValueError, r"Antigravity: missing skills=\['second'\]"):
+            self.read({'first': self.card, 'second': self.card})
 
     def test_invalid_card_fields_block_publication(self):
         bad_cards = [None, [], {**self.card, 'extra': 'unsupported'}]

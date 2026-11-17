@@ -38,9 +38,11 @@ not a full-project audit. State the source snapshot, inspected files/flows, and
 remaining unreviewed scope. The diff-specific
 commands below apply only to a change review.
 
-For a change review, use the fixed point the user supplied (a commit SHA, branch name, tag, `main`, `HEAD~5`, etc.). If none was supplied, infer the comparison from the request: for a PR or branch, use its merge base with the default branch; for work-in-progress changes, include staged and unstaged changes. State the chosen comparison in the report.
+Choose the comparison that matches the request. Use an explicitly supplied ref for its requested role, either as a snapshot or as the base branch for a branch/PR review. Resolve the refs and record the exact diff command and endpoints in the report.
 
-Capture the exact diff command once. For a committed branch comparison, use `git diff <fixed-point>...HEAD` and note the commits via `git log <fixed-point>..HEAD --oneline`.
+- For a comparison of committed snapshots, use `git diff <ref> HEAD`.
+- To review changes introduced by a branch or PR, use `git diff <base>...HEAD` from the merge base. Use the default branch when no base is given. Note the branch commits with `git log <base>..HEAD --oneline`.
+- For work in progress, use `git diff <ref>` for tracked changes, defaulting to `HEAD`. Include relevant untracked files as described below.
 
 Before going further, confirm any chosen ref resolves (`git rev-parse --verify <ref>`). For work in progress, inspect `git status --short` and enumerate untracked paths with `git ls-files --others --exclude-standard`. Include the contents of relevant new files even when the tracked diff is empty; leave unrelated and ignored files outside scope and do not stage files just to review them. Confirm that the selected review input is non-empty, and state any exclusions.
 

@@ -29,7 +29,7 @@ every workflow.
 | `codebase-design` | Module interfaces, dependency seams, or testability need a decision | Interface proposals; an evidence-backed architecture audit | Audit/proposals do not implement themselves |
 | `ponytail` | Keep coding changes minimal and complete | Session mode for simpler implementation | Does not remove required behavior, quality, states, or checks |
 | `spec-review` | Review changes or audit an existing project | Separate Standards and Spec findings plus scoped tool evidence | No unrequested fixes or project dependency changes; report missing checks explicitly |
-| `diagnosing-bugs` | A hard bug or performance regression has an unknown cause | Reproduction loop, root cause, focused fix and regression evidence | Diagnosis/fix within the request; stop for missing reproduction access rather than invent evidence |
+| `diagnosing-bugs` | A hard bug or performance regression has an unknown cause | Reproduction loop, root cause, focused fix and regression evidence | Fix only when authorized. Otherwise report the diagnosis or the missing evidence |
 | `retro` | An agent session produced avoidable failures | Evidence, causes, and proposed corrections | Report/proposals; no automatic rule, hook, or memory edits |
 | `caveman` | Short, dry, grammatical agent replies | Session mode for concise wording | Preserves requested depth, facts, uncertainty, and required outputs |
 | `humanizer` | Write, edit, or summarize prose from supplied facts and context | Natural text in the intended voice | No setup form; preserve relevant facts and material limits; only authorized file edits |
@@ -158,7 +158,9 @@ or makes an agent reliable. Prefer a relevant combination with a clear request.
 
 ## Example requests
 
-Examples use Codex's `$`; replace it with `/` in Claude Code or Antigravity.
+Examples use Codex's `$`. Use `/` in Claude Code or Antigravity.
+Stack skills in Claude Code’s interactive terminal. With `claude -p` or the
+Agent SDK, invoke each skill in a separate turn when it is needed.
 
 | Task | Example |
 |---|---|

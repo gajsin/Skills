@@ -6,8 +6,18 @@ param(
 )
 
 Write-Host "Steps: $Steps"
-Read-Host 'Press Enter after completing the steps' | Out-Null
-$answer = (Read-Host "Did $Symptom occur? (y/n)").Trim().ToLowerInvariant()
+$completed = Read-Host 'Press Enter after completing the steps'
+if ($null -eq $completed) {
+    Write-Error 'No verdict recorded: input ended.'
+    exit 2
+}
+
+$answer = Read-Host "Did $Symptom occur? (y/n)"
+if ($null -eq $answer) {
+    Write-Error 'No verdict recorded: input ended.'
+    exit 2
+}
+$answer = $answer.Trim().ToLowerInvariant()
 
 switch ($answer) {
     'y' { Write-Output 'SYMPTOM_OBSERVED=true (human report)'; exit 1 }

@@ -5,7 +5,6 @@ version: 4.7.1
 license: Apache-2.0
 allowed-tools:
   - Bash(npx impeccable *)
-  - Bash(.agent/skills/impeccable/scripts/impeccable *)
 ---
 
 <!-- Local host integration, 2026-10-25; author design rules preserved. -->
@@ -13,7 +12,7 @@ allowed-tools:
 ## Local activation and host integration
 
 - Activate only after the user explicitly invokes `/impeccable` or expressly asks to use Impeccable. Keep the upstream design rules and bans intact.
-- This is a global installation. Resolve every script path in this skill and its references against the actual directory containing this SKILL.md, not the project directory. In PowerShell use `& "<skill-base-dir>/scripts/impeccable.cmd" <arguments>`; keep cwd at the user's project. Unix shells use the sibling `scripts/impeccable` launcher.
+- Resolve `<skill-base-dir>` to the actual SKILL.md directory, using the loaded path or the host’s configured skill directories. Keep cwd at the user’s project and provide that absolute launcher path to any delegate that needs it. In Unix shells use `"<skill-base-dir>/scripts/impeccable"`. In PowerShell use `& "<skill-base-dir>/scripts/impeccable.cmd"`.
 - Use the host's structured question tool when available, respecting its question and option limits. Ask in the user's language and wait for required answers. An asynchronous question returning immediately, or elapsed time alone, is not an answer or approval.
 - Installing this skill does not enable automatic hooks or create shortcut skills. Enable hooks, pin shortcuts, or update the installation only when the user explicitly requests that action. An update notice is informational.
 
@@ -26,7 +25,9 @@ Core principles:
 
 ## Setup
 
-1. Run `<skill-base-dir>/scripts/impeccable context` once per session, where `<skill-base-dir>` is the directory that contains this SKILL.md (the skill folder, not a plugin root two levels above it); keep cwd at the user's project. That base directory resolves every `.agent/skills/impeccable/scripts/impeccable <verb>` command in this skill and its references, and `.agent/skills/impeccable/scripts` is the fallback only when the runtime reports no base directory. On a Windows shell without `sh`, call `.agent/skills/impeccable/scripts/impeccable.cmd` instead. The launcher runs a self-contained binary that ships next to it or is downloaded once on first run; no Node or other runtime is required. Pass a named source file or route as `--target <path>`. It loads PRODUCT.md, DESIGN.md, the matching surface brief, and native-platform guidance when applicable; follow its directives and do not rerun it.
+For a critique with a no-write restriction, skip the launcher bootstrap and `context`. Read any existing PRODUCT.md, DESIGN.md, and relevant surface brief directly, then follow the critique reference. Use only detector execution that can use an installed engine without writing files.
+
+1. Run the resolved launcher with `context` once per session. The launcher uses a bundled engine or downloads it on first run. No Node or other runtime is required. Pass a named source file or route as `--target <path>`. Follow the loaded PRODUCT.md, DESIGN.md, surface brief, and native-platform guidance as applicable.
 2. Load the request's playbook: its Commands-table reference for an explicit/implied sub-command, or [reference/new-work.md](reference/new-work.md) for a new surface or replacement visual world. Inspect target and incumbent visual truth before editing. When the app cannot run, start with committed visual-regression goldens or screenshot fixtures; verify target and freshness against current tokens, CSS, components, or assets, resolve conflicts, and compare theme/variant captures.
 3. After resolving analysis and direction, read [reference/craft-floor.md](reference/craft-floor.md) immediately before any UI edit, including small refinements. It carries the quality floor, the absolute bans, and the reflexes no detector catches. Do not load it for planning-only work.
 
@@ -89,9 +90,9 @@ Routing:
 
 After init writes PRODUCT.md, resume without rerunning `impeccable context`; init loads the native platform reference itself when the platform it recorded is `ios`, `android`, or `adaptive`.
 
-**Pin / Unpin:** `.agent/skills/impeccable/scripts/impeccable pin <pin|unpin> <command>` creates or removes a standalone `/<command>` shortcut. Report the script's result concisely; relay stderr verbatim on error.
+**Pin / Unpin:** `"<skill-base-dir>/scripts/impeccable" pin <pin|unpin> <command>` creates or removes a standalone `/<command>` shortcut. Report the script's result concisely; relay stderr verbatim on error.
 
-**Hooks:** `/impeccable hooks <on|off|status|ignore-rule|ignore-file|ignore-value|reset>` manages the design detector hook for this project (auto-runs the detector after UI file edits and surfaces findings). Load [reference/hooks.md](reference/hooks.md) when the user invokes it with any argument.
+**Detector:** Use the resolved launcher with `detect [target]` when this edition requests a final scan. For any `/impeccable hooks` request, load [reference/hooks.md](reference/hooks.md). The `status` command shows configuration, which by itself does not confirm an automatic hook.
 
 **Doctor:** `/impeccable doctor` reports and repairs drift between this project's Impeccable artifacts (PRODUCT.md, DESIGN.md and its sidecar, config, surface briefs, the hook) and what this version reads. Load [reference/doctor.md](reference/doctor.md) when the user invokes it, or when they ask what is out of date, stale, or needs refreshing. A `CONTEXT_STALE` directive in Setup's output is the cheap subset of the same report; act on it there per its own instructions rather than running doctor unasked.
 

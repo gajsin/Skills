@@ -16,9 +16,9 @@ LOCATIONS = {
 }
 POLICIES = {
     'codex': 'Codex invocation policies are included.',
-    'antigravity': ("Antigravity's manual-only preference is expressed in the descriptions;\n"
-                    'it is not a technical enforcement guarantee. The location above is for\n'
-                    'App/IDE; CLI users copy skills to `~/.gemini/antigravity-cli/skills`.'),
+    'antigravity': ("Antigravity can select skills automatically. The skill descriptions request\n"
+                    'explicit invocation. App/IDE and CLI read the location above. CLI copies in\n'
+                    '`~/.gemini/antigravity-cli/skills` or `~/.gemini/skills` take priority.'),
     'claude': ('Every skill sets `disable-model-invocation: true`. Copy the files in\n'
                '`agents/` to `~/.claude/agents` for the Impeccable helper agents.'),
 }
@@ -37,14 +37,18 @@ ORIGINS = {
 SKIP_DIRS = {'.git', '.cache', '__pycache__', 'node_modules', '.venv'}
 
 
-def build_bundle(repo_root, platform, output):
-    root = (repo_root / PLATFORMS[platform] / 'skills').resolve()
+def skill_dirs(root):
     if not root.is_dir():
         raise ValueError(f'Missing skill source directory: {root}')
+    return sorted(p for p in root.iterdir() if p.is_dir() and (p / 'SKILL.md').is_file())
+
+
+def build_bundle(repo_root, platform, output):
+    root = (repo_root / PLATFORMS[platform] / 'skills').resolve()
     output = output.resolve()
     if root == output or root in output.parents:
         raise ValueError('The archive must be outside the skill source directory.')
-    skills = sorted(p for p in root.iterdir() if p.is_dir() and (p / 'SKILL.md').is_file())
+    skills = skill_dirs(root)
     if not skills:
         raise ValueError('No skills found.')
     files = []

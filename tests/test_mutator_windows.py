@@ -29,6 +29,16 @@ def hashes(root):
             and ".metrics" not in p.relative_to(root).parts and "__pycache__" not in p.parts}
 
 
+class SharedQualityToolTests(unittest.TestCase):
+    def test_host_editions_share_quality_tool_sources(self):
+        codex = HELPER.parent.parent
+        for platform in ('Antigravity', 'Claude Code'):
+            edition = REPO / platform / 'skills/spec-review'
+            for directory in ('scripts', 'patches'):
+                with self.subTest(platform=platform, directory=directory):
+                    self.assertEqual(hashes(edition / directory), hashes(codex / directory))
+
+
 class MutationTests(unittest.TestCase):
     def setUp(self):
         self.temporary = tempfile.TemporaryDirectory(prefix="mutator-native-")

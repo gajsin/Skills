@@ -72,10 +72,12 @@ installation. Restart the agent if the changes do not appear.
 |---|---|---|
 | Codex | `Codex/skills/<skill-name>/` | `~/.agents/skills/` |
 | Claude Code | `Claude Code/skills/<skill-name>/` | `~/.claude/skills/` |
-| Antigravity App/IDE | `Antigravity/skills/<skill-name>/` | `~/.gemini/config/skills/` |
+| Antigravity App/IDE and CLI | `Antigravity/skills/<skill-name>/` | `~/.gemini/config/skills/` |
 
-For Antigravity CLI, use `~/.gemini/antigravity-cli/skills/` instead. Existing
-working installations do not need to be moved merely to follow this table.
+Antigravity CLI also reads `~/.gemini/antigravity-cli/skills/` and
+`~/.gemini/skills/`. Copies there take priority over the shared directory.
+[Antigravity skill discovery](https://antigravity.google/docs/customization-discovery/)
+
 When installing Impeccable for Claude Code, also copy `Claude Code/agents/*`
 into `~/.claude/agents/`.
 
@@ -136,8 +138,9 @@ python scripts/publish_manifest.py --output dist --download-base https://github.
 ```
 
 Check the generated `dist/skills.json`: names, order, categories, descriptions,
-results, boundaries, and all three packs. The builder rejects missing or obsolete
-cards, missing fields, and empty values before creating archives. Do not commit
+results, boundaries, and all three packs. The builder checks the skill names in
+all three packs against the catalog and rejects missing fields or empty values
+before creating archives. Do not commit
 `dist/`. Use a clear commit title and body describing the actual user-facing
 change: the website's journal displays that text.
 

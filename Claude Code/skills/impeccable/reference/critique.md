@@ -1,14 +1,15 @@
 ### Purpose
 
-Resolve one stable target, run two independent assessments, synthesize a design critique, persist a snapshot, and ask the user what to improve next. The chat response is the primary deliverable; the snapshot is an archive of that run.
+Resolve one stable target, run two independent assessments, synthesize a design critique, persist a snapshot when allowed, and ask the user what to improve next. The chat response is the primary deliverable; the snapshot is an archive of that run.
 
 ### Hard Invariants
 
+- If the user prohibits file writes, deliver the critique in chat. Apply that limit to both assessments, skip snapshot and temporary-file writes, and use only inspection and detector commands that respect it. Skip live-server or overlay setup that writes files. Report any missing evidence.
 - Assessment A (design review) and Assessment B (detector/browser evidence) are both required, except on a native platform (see Assessment Orchestration).
 - Assessment A and B MUST run as two isolated sub-agents whenever a sub-agent/Task tool is exposed. Running them inline in this context is "possible" but is NOT permitted; it is a degraded run. Inline is allowed ONLY when no sub-agent tool exists (or the user declined, on harnesses that ask). Native platforms run A alone (see Assessment Orchestration).
 - If you degrade for any reason, the report's first line MUST be a banner: `⚠️ DEGRADED: single-context (<reason>)`. A silent degraded critique is a failed critique.
 - Assessment A must finish before detector findings enter the parent synthesis context. Detector output is deterministic, but it still anchors judgment.
-- A skipped detector is a failed critique run unless `impeccable detect` is missing or crashes after a real attempt, or the platform is native (see Assessment Orchestration).
+- A skipped detector is a failed critique run unless it is unavailable under the requested write limits, `impeccable detect` is missing or crashes after a real attempt, or the platform is native (see Assessment Orchestration).
 - Viewable targets require browser inspection when available.
 - Any local server started only for critique visualization must run in the background, have a recorded stop method, and be stopped before final reporting unless the user asks to keep it.
 - Do not claim a user-visible overlay exists unless script injection succeeded and the detector ran in the page.
@@ -21,7 +22,7 @@ Resolve one stable target, run two independent assessments, synthesize a design 
    - "the homepage" -> `site/pages/index.astro` or `index.html`
    - "the settings modal" -> the primary component file
    - "this page" -> the current URL or source file
-2. **Confirm the target slugs cleanly**:
+2. **Confirm the target slugs cleanly** (skip this when file writes are prohibited):
    ```bash
    "<skill-base-dir>/scripts/impeccable" critique-storage slug "<resolved-path-or-url>"
    ```
@@ -199,7 +200,7 @@ Persistence is not the end of the run. After it, the response continues with the
 
 Once the report above is finalized, write it to `.impeccable/critique/` so the user can refer back, and so `/impeccable polish` can pick up the priority issues without a copy-paste.
 
-Skip this step if the Setup slug was null (vague or root-level target).
+Skip this entire section if file writes are prohibited or the Setup slug was null (vague or root-level target). Continue to Ask the User.
 
 1. **Write the body to a temp file** so you can pipe it to the helper. Use the full critique report (heuristic table, design-specificity verdict, priority issues, persona red flags, minor observations, and questions), but stop before the "Ask the User" / "Recommended Actions" sections that come later.
 

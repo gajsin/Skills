@@ -7,6 +7,7 @@ description: Diagnose a hard bug or performance regression with a verified repro
 # Diagnosing Bugs
 
 A discipline for hard bugs. Skip phases only when explicitly justified.
+For diagnosis-only requests, establish the reproduction and cause within the requested access and write limits. Use read-only evidence when edits are prohibited.
 
 When exploring the codebase, read relevant `CONTEXT.md` or `GLOSSARY.md` files when present to get a clear mental model of the relevant modules, and check ADRs in the area you're touching.
 
@@ -33,7 +34,7 @@ Spend disproportionate effort here. **Be aggressive. Be creative. Refuse to give
 7. **Property / fuzz loop.** If the bug is "sometimes wrong output", run 1000 random inputs and look for the failure mode.
 8. **Bisection harness.** If the bug appeared between two known states (commit, dataset, version), automate "boot at state X, check, repeat" so you can `git bisect run` it.
 9. **Differential loop.** Run the same input through old-version vs new-version (or two configs) and diff outputs.
-10. **Human-in-the-loop script.** Last resort. On Windows use `scripts/hitl-loop.template.ps1`; with Bash use `scripts/hitl-loop.template.sh`. Supply the actual reproduction steps and exact symptom as arguments. These scripts record a human yes/no observation and exit 1 when the symptom occurs, 0 when it does not, or 2 when no verdict is available. They do not automate the product or prove the symptom independently.
+10. **Human-in-the-loop script.** Last resort. Resolve `<skill-dir>` to the directory containing this SKILL.md. In PowerShell run `& "<skill-dir>/scripts/hitl-loop.template.ps1" -Steps "reproduction steps" -Symptom "exact symptom"`. In Bash run `bash "<skill-dir>/scripts/hitl-loop.template.sh" "reproduction steps" "exact symptom"`. These scripts record a human yes/no observation and exit 1 when the symptom occurs, 0 when it does not, or 2 when no verdict is available. They do not automate the product or prove the symptom independently.
 
 Build the right feedback loop, and the bug is 90% fixed.
 
@@ -113,6 +114,8 @@ Tool preference:
 **Perf branch.** For performance regressions, logs are usually wrong. Instead: establish a baseline measurement (timing harness, `performance.now()`, profiler, query plan), then bisect. Measure first, fix second.
 
 ## Phase 5: Fix + regression test
+
+Enter this phase only when a fix is authorized. For diagnosis only, clean up your authorized temporary diagnostics, report the reproduction and cause with evidence, and stop before changing the product or adding regression tests.
 
 Write the regression test **before the fix**, but only if there is a **correct seam** for it.
 

@@ -7,20 +7,25 @@ import json
 import re
 import subprocess
 
-from package_skills import LOCATIONS, ORIGINS, PLATFORMS, build_bundle
+from package_skills import LOCATIONS, ORIGINS, PLATFORMS, build_bundle, skill_dirs
 
 REPO = Path(__file__).resolve().parents[1]
 CARD_FIELDS = {'group', 'use', 'result', 'edits'}
 
 
-def load_catalog(names):
-    """Require one complete public card per published skill; preserve the catalogue order."""
+def load_catalog():
+    """Require a complete card for each skill in each host edition."""
     catalog = json.loads((REPO / 'catalog.json').read_text(encoding='utf-8'))
     if not isinstance(catalog, dict):
         raise ValueError('catalog.json must contain an object keyed by skill name')
-    missing, obsolete = sorted(set(names) - set(catalog)), sorted(set(catalog) - set(names))
-    if missing or obsolete:
-        raise ValueError(f'catalog.json does not match the skills: missing={missing}, obsolete={obsolete}')
+    card_names = set(catalog)
+    for edition in PLATFORMS.values():
+        directory = REPO / edition / 'skills'
+        skill_names = {path.name for path in skill_dirs(directory)}
+        missing = sorted(card_names - skill_names)
+        extra = sorted(skill_names - card_names)
+        if missing or extra:
+            raise ValueError(f'catalog.json does not match {edition}: missing skills={missing}, extra skills={extra}')
     for name, card in catalog.items():
         if not isinstance(card, dict) or set(card) != CARD_FIELDS:
             raise ValueError(f'{name}: the catalogue card must have group, use, result and edits')
@@ -45,8 +50,7 @@ def field(text, key, name):
 def build_manifest(output, download_base):
     commit, date = git('log', '-1', '--format=%H %cs').split(' ')
     folder = REPO / PLATFORMS['claude'] / 'skills'
-    names = sorted(path.name for path in folder.iterdir() if (path / 'SKILL.md').is_file())
-    catalog = load_catalog(names)
+    catalog = load_catalog()
     skills = []
     for name, card in catalog.items():
         text = (folder / name / 'SKILL.md').read_text(encoding='utf-8')
@@ -65,7 +69,7 @@ def build_manifest(output, download_base):
               *(f'{edition}/skills' for edition in PLATFORMS.values()))
     for block in filter(None, log.split('\x1e')):
         day, *files = block.strip().split('\n')
-        changed = sorted({parts[2] for parts in (path.split('/') for path in files) if len(parts) > 3 and parts[2] in names})
+        changed = sorted({parts[2] for parts in (path.split('/') for path in files) if len(parts) > 3 and parts[2] in catalog})
         if not changed:
             continue
         if updates and updates[-1]['date'] == day:

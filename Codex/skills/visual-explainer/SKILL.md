@@ -1,16 +1,16 @@
 ---
 name: visual-explainer
-description: "Author meaningful SVG illustrations and explanatory diagrams directly in code, using a monochrome design system. Animate when requested. Invoke explicitly."
+description: "Create editable SVG illustrations, diagrams, and data charts in a monochrome design system. Animate when requested. Invoke explicitly."
 license: MIT
 ---
 
 # Visual Explainer
 
 Create a visual that explains the requested idea: an editorial illustration,
-diagram, comparison, instructional card, or a short animation. Topics can belong
-to any domain. The bundled [design system](references/design-system.md) defines
-the default appearance; the subject, metaphor, composition, and visual structure
-must come from the current request. Use the user's language.
+diagram, data chart, comparison, instructional card, or a short animation.
+Topics can belong to any domain. The bundled [design system](references/design-system.md)
+defines the default appearance; the subject, metaphor, composition, and visual
+structure must come from the current request. Use the user's language.
 
 Create all artwork directly as native SVG geometry and text. Do not use imagegen,
 other image-generation tools or APIs, generated-image tracing, or bitmaps hidden
@@ -47,11 +47,18 @@ explicit. Neither form is universally preferable.
   Make cause, direction, grouping, and before/after states distinguishable.
   Do not force every subject into circles, arrows, funnels, or the reference video.
 - A metaphor may simplify the subject; it must not add an unsupported causal claim,
-  change its logic, or present qualitative sizes as measured data. Use supplied
-  values faithfully when drawing actual charts; label an illustrative schematic.
+  change its logic, or present qualitative sizes as measured data. Label an
+  illustrative schematic as such.
 - Test the concept internally: can you explain how the drawing communicates the
   idea, and what a viewer could misunderstand? A caption may orient the reader,
   but should not have to invent meaning for decorative geometry afterwards.
+
+For a data chart, choose the encoding and scale from the comparison the reader
+needs to make. The subject can shape the marks (for example, a spending breakdown
+as proportional bands of a receipt). Plot supplied values to scale and keep
+units and comparisons legible at the intended size. Use a conventional chart
+when the illustrated form makes comparison harder. Follow the bundled visual
+language either way. See [Minicharts](https://april-zhu.com/minicharts) for examples.
 
 When variants are requested, make the requested number visually inspectable.
 Explore different useful mechanisms before tiny contour or spacing changes.

@@ -37,6 +37,12 @@ For generation, specify purpose, provisional concept, reference traits, constrai
 
 Actually view outputs and compare them with the brief, references, and the intended difference before asking for a decision. Correct clear departures; identify unresolved mismatches. A link alone is not inspection. Show studies inline through the supported display path.
 
+When presenting logo candidates for selection, show each plain mark at comparable
+scale, in monochrome on light and dark backgrounds and at the smallest size
+relevant to its intended use. Check that its silhouette remains recognizable
+and that small gaps, details, and lettering stay distinct. Check print
+reproduction and clear space when the brief calls for them.
+
 Explain what each proposal tests, then synthesize feedback and recommend the next useful action. If an optical adjustment is subtle, say so and show a useful scale/detail; do not present it as a new concept. If proposals miss, locate the failed decision before regenerating or reopening questions. Stop repeated near-duplicates and invented score chasing.
 
 ## Preserve candidate identity

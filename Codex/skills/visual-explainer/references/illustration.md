@@ -7,11 +7,16 @@ that carries it within the bundled design system.
 
 ## Find an image, not a diagram skin
 
-Choose a visible situation or transformation that embodies the idea. It may
-use a recognizable object, human figure, organic silhouette, cutaway, field of
-marks, material-like layers, or purely geometric relationships. A useful
-metaphor has a reason for its important shapes and their interaction; the
-reason must precede the caption.
+Choose a viewpoint, pose, or moment that carries the idea. For a cover or
+editorial illustration, open the user's reference or a suitable sheet from the
+[visual reference gallery](gallery.md). Choose a specific image and identify
+what guides the eye. A trail can lead to a small figure. Repeated forms at
+different scales can create depth. An edge crop, overlap, or boundary between
+light and dark can change how a silhouette reads. Use the chosen relationship
+to place and scale the subject in a rough composition. Compare the rough with
+the selected image before detailing. If two plausible directions would change
+the composition substantially and the request leaves the choice open, show
+both references and ask one focused question.
 
 Prefer one strong focal construction to several small unrelated symbols.
 Fine construction lines, repetition, occlusion, scale contrast, and negative

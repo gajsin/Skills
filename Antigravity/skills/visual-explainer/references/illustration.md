@@ -48,13 +48,17 @@ overlapping shapes and masks for interweaving, repeated paths for layers or
 cross-sections, and negative space for cuts and openings. Choose the technique
 for the idea rather than using one construction for every subject. These are
 vector-authoring options, not external image-generation steps or fixed templates.
-Inspect a rough SVG at the destination size before detailing it. With visual
-references, compare silhouette, relative scale, cropping, density, rhythm, and
-line character; matching the palette alone is insufficient. Can a viewer
-distinguish the important forms and understand their relationship without the
-caption supplying a missing mechanism? Revise the construction before polishing
-a weak idea. For a series, compare the actual drawings together to catch repeated
-compositions disguised by different labels.
+Inspect a rough SVG at the intended display size before detailing it. Hide the
+title and explanatory captions. Identify what draws the eye first and describe
+what the forms appear to be doing. In an explanatory illustration, check that the
+intended relationship reads and look for a plausible misreading. In a cover,
+check that the subject or visual hook reads; the title may supply the exact
+topic. Revise an unclear focus or misleading relationship, then restore the text
+and check it against the image.
+
+With references, compare silhouette, relative scale, cropping, density, rhythm,
+and line character alongside the palette. For a series, compare the drawings
+side by side to catch repeated compositions.
 
 Then inspect detail: keep calculated curves smooth at their joins, make overlaps
 and openings physically legible, and preserve editable type and consistent fills.

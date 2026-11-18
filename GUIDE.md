@@ -33,7 +33,7 @@ every workflow.
 | `retro` | An agent session produced avoidable failures | Evidence, causes, and proposed corrections | Report/proposals; no automatic rule, hook, or memory edits |
 | `caveman` | Short, dry, grammatical agent replies | Session mode for concise wording | Preserves requested depth, facts, uncertainty, and required outputs |
 | `humanizer` | Write, edit, or summarize prose from supplied facts and context | Natural text in the intended voice | No setup form; preserve relevant facts and material limits; only authorized file edits |
-| `impeccable` | Build, assess, or refine a UI | Depends on the selected command | Build/refine edits the UI; critique/audit assess it and may write review artifacts |
+| `impeccable` | Build, assess, or refine a UI | Selects and combines methods from one request | Review requests produce findings and may save review artifacts; improvement requests apply and verify fixes within scope |
 | `gsap` | GSAP is selected for a website animation | Scoped implementation; React and ScrollTrigger references loaded as needed | No migration of a suitable stack or dependency installation merely because the skill was invoked |
 | `logo-interview` | Find a logo direction through an interview and visual comparison | Agreed brief, viewed moodboard/direction, authorized studies or exports | Preserve originals and decision levels; no automatic site changes |
 | `visual-explainer` | Explain an idea through an authored SVG illustration or diagram | Editable SVG and requested exports in the bundled monochrome design; animation when requested | No image-generation services or bitmap wrappers; no automatic UI changes or video production |
@@ -171,7 +171,8 @@ Agent SDK, invoke each skill in a separate turn when it is needed.
 | Review someone else's work | `$spec-review $codebase-design Review this branch against the attached spec. Do not edit files.` |
 | Audit an existing project | `$spec-review Audit the entire project against its requirements and standards; report findings without fixes.` |
 | Hard bug | `$diagnosing-bugs $ponytail Reproduce and fix this failure. Add Architecture First if the fix requires a substantial design change.` |
-| UI audit | `$impeccable audit the checkout form; report findings without product fixes.` |
+| UI audit | `$impeccable Review this checkout flow for visual and accessibility issues; findings only.` |
+| Site-wide design improvement | `$impeccable Review and improve this site. Remove generic decoration, unify type and spacing, preserve behavior, and show what you verified.` |
 | Scroll animation in React | `$gsap Implement this agreed scroll animation using the existing GSAP setup.` |
 | Logo direction | `$logo-interview Help me find a logo direction through an interview and visual board.` |
 | Explanatory illustration | `$visual-explainer Explain this idea with a finished illustration in the bundled monochrome design system.` |

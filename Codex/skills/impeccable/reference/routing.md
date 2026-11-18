@@ -2,11 +2,19 @@
 
 ## Workflow questions
 
-Give advice without executing commands; the menu below is only for bare invocations. Consult relevant command references as needed for prerequisites and scope. Link to the [docs](https://impeccable.style/docs/) for the broader workflow guide. If the user also requests execution, follow that request.
+Give advice without executing workflows; the menu below is only for invocations without a task. Consult relevant command references as needed for prerequisites and scope. Link to the [docs](https://impeccable.style/docs/) for the broader workflow guide. If the user also requests execution, follow that request.
 
-## No-argument routing: the context-aware menu
+## Review and improve
 
-Read this when the user invokes `$impeccable` with no argument. They are asking "what should I do?" Make the menu context-aware instead of static.
+Start with the user’s requested outcome and scope. For this workflow, reuse applicable findings and verification across references; each reference supplies its method, not another standalone run. A request to review, audit, or suggest improvements returns findings unless it also authorizes edits. A request to improve an existing UI authorizes fixes within that scope. Preserve the established identity, content, and behavior unless the user asks to change them.
+
+1. **Inspect the affected UI.** For a whole site, map its routes, distinct page templates, shared components, and relevant states. Inspect representative pages for each template and record actual coverage and gaps. If editing, capture representative before views where possible. Use [critique](critique.md) when design, usability, or generic patterns are in scope, and [audit](audit.md) for applicable technical checks. Reuse relevant current detector evidence without duplicating scans of the same scope and state. A detector flag calls for judgment; a clean scan does not establish quality.
+2. **Apply the methods that match confirmed findings if edits were requested.** Use [typeset](typeset.md) for font roles, scales, and readability; [layout](layout.md) for grouping, alignment, and spacing; [distill](distill.md) for redundant containers and visual noise; [colorize](colorize.md) for color roles and contrast within the identity; [clarify](clarify.md) for unclear interface copy. Read only the references that apply; the other commands remain available when the task calls for them. Fix repeated defects in their shared styles or components. Use consistent spacing for equivalent relationships and keep purposeful differences in hierarchy. Combine changes in one pass and use [polish](polish.md) for final refinement and verification. Hand the current findings directly to that pass instead of reopening a prior report or re-auditing unchanged work.
+3. **Verify and report.** For web UI changes, inspect the same affected routes and states after changes at desktop and phone widths. Exercise the affected interactions, verify the design and accessibility details the change touches, and check shared changes on their consumers. Show or link before/after when available. State which routes and states were checked and what could not be verified. PRODUCT.md and DESIGN.md are context; writing them does not complete a UI improvement.
+
+## No-task routing: the context-aware menu
+
+Use this menu only when neither the invocation nor the referenced conversation gives an actionable task. If a task is clear but its target cannot be resolved from context or the project, ask for the target instead of listing commands.
 
 Setup has already run `impeccable context`. If that reported `NO_PRODUCT_MD`, the project has no captured context yet: lead the menu with `$impeccable init` as the top recommendation (one line on why) and still show the rest below; don't silently jump into init. Otherwise run `"<skill-base-dir>/scripts/impeccable" signals` once and read its JSON, then lead with the **2-3 highest-value next commands**, each with a one-line reason pulled from the signals, followed by the full menu (the Commands table in SKILL.md, grouped by category). **Never auto-run a command; the recommendation is a suggestion the user confirms.**
 

@@ -82,10 +82,10 @@ Choose the mode from the requested surface, not the product, and persist it only
 
 Routing:
 
-- **No argument:** read [routing.md](reference/routing.md) and present its context-aware menu; never auto-run a command.
-- **Explicit or clearly implied request to run a command:** load its reference (native variant on native platforms) and follow it. Ask once if two commands fit.
-- **Workflow or command-selection question:** read [Workflow questions](reference/routing.md#workflow-questions).
-- **Otherwise:** treat the request as general design work. Missing PRODUCT.md routes a new surface or replacement world through init, then new-work; a narrow refinement of existing code proceeds on the incumbent implementation as `impeccable context` directs, offering init afterward rather than blocking on it.
+- **Task first:** use the current request and any clearly pending task the user is referring to, even when the invocation itself has no arguments. Give advice or findings for requests to assess or recommend. For requests to improve or fix, carry the authorized work through implementation and verification. Where multiple methods fit, combine the relevant references without asking the user to choose command names; ask only when a missing decision materially changes scope, design direction, or behavior.
+- **Choose the workflow:** honor a named command and any requested follow-on work. Otherwise select the focused methods that match the task. For a broad review, a review with fixes, or an improvement spanning several kinds of issue in existing UI, use [the combined workflow](reference/routing.md#review-and-improve) and reuse evidence across its references.
+- **No actionable task:** use [routing.md](reference/routing.md) for workflow questions or the context-aware menu. A bare call with no pending task does not authorize changes.
+- **New work without a more specific command:** a new surface or replacement visual world uses [new-work.md](reference/new-work.md), with init first if PRODUCT.md is missing. Work on an established surface uses existing code and context; offer missing documentation afterward rather than blocking on it.
 - `teach` aliases `init`. `craft` is a deprecated alias for ordinary new-work and adds nothing. `shape` owns task discovery, then enters new-work only for visual-world and surface-concept decisions.
 
 After init writes PRODUCT.md, resume without rerunning `impeccable context`; init loads the native platform reference itself when the platform it recorded is `ios`, `android`, or `adaptive`.

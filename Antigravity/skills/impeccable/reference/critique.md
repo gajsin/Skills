@@ -1,20 +1,20 @@
 ### Purpose
 
-Resolve one stable target, run two independent assessments, synthesize a design critique, persist a snapshot when allowed, and ask the user what to improve next. The chat response is the primary deliverable; the snapshot is an archive of that run.
+For a standalone critique, resolve one stable target, run the two assessments, and report findings. Within [a broader review or an authorized improvement](routing.md#review-and-improve), apply the same design and evidence checks to the selected targets, consolidate findings once, and hand them back to the parent workflow. The standalone report and closing questions apply only to standalone critique.
 
 ### Hard Invariants
 
 - If the user prohibits file writes, deliver the critique in chat. Apply that limit to both assessments, skip snapshot and temporary-file writes, and use only inspection and detector commands that respect it. Skip live-server or overlay setup that writes files. Report any missing evidence.
 - Assessment A (design review) and Assessment B (detector/browser evidence) are both required, except on a native platform (see Assessment Orchestration).
-- Assessment A and B MUST run as two isolated sub-agents whenever a sub-agent/Task tool is exposed. Running them inline in this context is "possible" but is NOT permitted; it is a degraded run. Inline is allowed ONLY when no sub-agent tool exists (or the user declined, on harnesses that ask). Native platforms run A alone (see Assessment Orchestration).
-- If you degrade for any reason, the report's first line MUST be a banner: `⚠️ DEGRADED: single-context (<reason>)`. A silent degraded critique is a failed critique.
+- In standalone critique, Assessment A and B MUST run as two isolated sub-agents whenever a sub-agent/Task tool is exposed. Running them inline in this context is "possible" but is NOT permitted; it is a degraded run. Inline is allowed ONLY when no sub-agent tool exists (or the user declined, on harnesses that ask). Native platforms run A alone (see Assessment Orchestration).
+- If a standalone critique degrades, its report's first line MUST be a banner: `⚠️ DEGRADED: single-context (<reason>)`. A silent degraded critique is a failed critique.
 - Assessment A must finish before detector findings enter the parent synthesis context. Detector output is deterministic, but it still anchors judgment.
 - A skipped detector is a failed critique run unless it is unavailable under the requested write limits, `impeccable detect` is missing or crashes after a real attempt, or the platform is native (see Assessment Orchestration).
 - Viewable targets require browser inspection when available.
 - Any local server started only for critique visualization must run in the background, have a recorded stop method, and be stopped before final reporting unless the user asks to keep it.
 - Do not claim a user-visible overlay exists unless script injection succeeded and the detector ran in the page.
-- The question is the LAST thing in the response. Write the entire report out first, then ask; nothing follows the question. Prose emitted after a structured question is withheld until the user answers it, so a report written after the question reads as if the critique never ran.
-- A run that ends with neither the targeted questions nor a literal `Questions skipped: <reason>` line is an incomplete run. The report is not the finish; the close is.
+- For a standalone critique, the question is the LAST thing in the response. Write the entire report out first, then ask; nothing follows the question. Prose emitted after a structured question is withheld until the user answers it, so a report written after the question reads as if the critique never ran.
+- A standalone run that ends with neither the targeted questions nor a literal `Questions skipped: <reason>` line is an incomplete run. The report is not the finish; the close is.
 
 ### Setup
 
@@ -31,11 +31,13 @@ Resolve one stable target, run two independent assessments, synthesize a design 
 
 ### Assessment Orchestration
 
+For a combined workflow, use independent assessment when it is available and already authorized. Otherwise perform the design review first and the detector/browser evidence pass separately, then synthesize; note that both were done in the same context. Do not stop the combined workflow solely to request delegation or repeat an applicable assessment. Use the standalone delegation gates below for standalone critique.
+
 **Native platforms** (`ios` / `android` / `adaptive`): Assessment B does not apply, because `impeccable detect` and the browser overlay read only web markup. Run Assessment A alone in this context and skip both sub-agent gates below, the Codex permission question included: with no B there is nothing to isolate A from, so this is the complete native method and carries no degraded banner. Do not run `impeccable detect` on native source; its empty result reads as clean.
 
-Delegate Assessment A and Assessment B to separate sub-agents. They must not see each other's output. Do not show findings to the user until synthesis.
+When delegating, use distinct sub-agents for Assessments A and B, and keep their outputs separate until synthesis.
 
-Sub-agent gate (all harnesses):
+Standalone sub-agent gate (all harnesses):
 - Unless a harness-specific gate below overrides this, spawn A and B as two isolated, parallel sub-agents whenever a sub-agent/Task tool is exposed. This is the default and is mandatory; do not run them inline because it is faster.
 - Desktop apps (see **Desktop apps** under Assessment B) are the one exception to parallel: both sub-agents would drive the app's single window at once. Seed the window, spawn A, wait until it has finished and put the window back, then spawn B. They are still two isolated sub-agents, so this is not the degraded path.
 - "Unavailable" means exactly one thing: no sub-agent/Task tool is exposed in this session (or, on harnesses that ask, the user declined). It does not mean inconvenient.
@@ -97,7 +99,7 @@ After Assessment B returns usable CLI findings, reuse them. Do not rerun `impecc
 
 Synthesize both assessments into a single report. Do not simply concatenate. Weave the findings together, noting where the LLM review and detector agree, where the detector caught issues the LLM missed, and where detector findings are false positives.
 
-The chat response is the primary user-facing deliverable. Present the full structured critique below in chat; do not replace it with a summary and a link. The persisted snapshot is an archive of that run.
+For standalone critique, present the full structured report in chat; a saved snapshot is only its archive. In a combined workflow, carry findings and evidence into the consolidated result.
 
 Structure your feedback as a design director would:
 
@@ -190,9 +192,9 @@ Provocative questions that might unlock better solutions:
 
 ### Deliver the Report
 
-Write the full report into the chat response now, before any persistence work. This is the deliverable; everything below it is bookkeeping.
+For a standalone critique, write the full report into the chat response now, before any persistence work. This is the deliverable; everything below it is bookkeeping. In a combined workflow, keep the report body for the handoff or snapshot.
 
-Do this first because the alternative is the most common way this command fails: the report gets composed once, straight into the persistence heredoc, and the run ends with a perfect archive nobody has read. Composing it into a file is not delivering it. If the report exists only in `.impeccable/critique/`, the run produced nothing.
+For standalone critique, do this first because the alternative is the most common way this command fails: the report gets composed once, straight into the persistence heredoc, and the run ends with a perfect archive nobody has read. Composing it into a file is not delivering it. If the report exists only in `.impeccable/critique/`, the run produced nothing.
 
 Persistence is not the end of the run. After it, the response continues with the trend line and the close.
 
@@ -200,7 +202,7 @@ Persistence is not the end of the run. After it, the response continues with the
 
 Once the report above is finalized, write it to `.impeccable/critique/` so the user can refer back, and so `/impeccable polish` can pick up the priority issues without a copy-paste.
 
-Skip this entire section if file writes are prohibited or the Setup slug was null (vague or root-level target). Continue to Ask the User.
+In a combined workflow, skip snapshot storage and continue to the handoff at Ask the User. In standalone critique, skip storage if file writes are prohibited or the Setup slug was null (vague or root-level target), then continue to the closing questions.
 
 1. **Write the body to a temp file** so you can pipe it to the helper. Use the full critique report (heuristic table, design-specificity verdict, priority issues, persona red flags, minor observations, and questions), but stop before the "Ask the User" / "Recommended Actions" sections that come later.
 
@@ -230,11 +232,13 @@ Skip this entire section if file writes are prohibited or the Setup slug was nul
 
    If this is the first run for the slug, the trend is just one score; say so: "First run for this target, no trend yet."
 
-6. **Close the run.** Go to Ask the User below and emit the questions, or the `Questions skipped: <reason>` line when the count allows it. The run is not complete until you do. Persistence is bookkeeping and cleanup is not an ending; stopping here leaves the user with a report and no way forward, and leaves `/impeccable polish` with no priorities to inherit.
+6. **Close the standalone run.** Go to Ask the User below.
 
 This is fire-and-forget. Do not show the user the helper's JSON output; only the human-readable trend line and the written path. Failures here should not block the rest of the flow; print the error and move on.
 
 ### Ask the User
+
+For a combined workflow, skip the standalone close: hand off each material finding with its scope, evidence, and proposed fix. Follow the parent request: continue with authorized fixes and verification, or return findings only. Ask only when a missing decision materially changes scope, direction, or behavior. The rest of this section and Recommended Actions are for standalone critique.
 
 **After presenting findings**, use targeted questions based on what was actually found. Ask the user directly to clarify what you cannot infer. These answers will shape the action plan.
 

@@ -28,6 +28,7 @@ ORIGINS = {
     'ponytail': 'https://github.com/DietrichGebert/ponytail/tree/09c434a',
     'caveman': 'https://github.com/juliusbrussee/caveman/tree/9b68f7ed12b05e7efaff18e65c5a3fc2849fd0a4',
     'humanizer': 'https://github.com/blader/humanizer/tree/225a6f39ac85f76ee48dbad772ea4abe4ed6c9d8',
+    'editor': 'https://github.com/N1arko/redaktura-skills/tree/d1ebaff4fb8b97f939826a1cac284c10303be6f1',
     'impeccable': 'https://github.com/pbakaus/impeccable/tree/936867543ac2576920d663cc9803597f6044f3ac',
     **{name: 'https://github.com/greensock/gsap-skills/tree/aed9cfd3277740755f6bfc1155c7aa645403b760'
        for name in ['gsap']},

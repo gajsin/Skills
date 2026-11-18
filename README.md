@@ -24,6 +24,7 @@ and capabilities. Host-specific upstream builds may also differ.
 | `retro` | Review an agent session and propose the smallest evidence-backed corrections. |
 | `caveman` | Session mode: short, dry, grammatical replies without losing facts. |
 | `humanizer` | Write or edit natural prose and concise session summaries from the available context, preserving facts and the intended voice. |
+| `editor` | Prepare articles, posts, and promotional copy for publication, or edit drafts. One invocation selects the workflow. |
 | `impeccable` | Design, critique, audit, and polish user interfaces (by [pbakaus/impeccable](https://github.com/pbakaus/impeccable)). |
 | `gsap` | Implement GSAP website animation; read React lifecycle and ScrollTrigger guidance only when relevant. |
 | `logo-interview` | Find a logo direction through an interview, a moodboard, and SVG studies. |
@@ -169,6 +170,7 @@ excluded. Individual skills can also be installed directly from the public repos
 | diagnosing-bugs, spec-review, codebase-design, grilling, retro | MIT | Adapted from [mattpocock/skills](https://github.com/mattpocock/skills) |
 | ponytail | MIT | Adapted from [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail) |
 | humanizer | MIT | Adapted from [blader/humanizer](https://github.com/blader/humanizer) |
+| editor | CC BY 4.0 | Adapted from [N1arko/redaktura-skills](https://github.com/N1arko/redaktura-skills), by Lyudmila Sarycheva and Nikita Arkhipov |
 | gsap | MIT | Consolidated from [greensock/gsap-skills](https://github.com/greensock/gsap-skills); original license retained |
 | caveman | Apache-2.0, with a retained MIT notice | Adapted from [juliusbrussee/caveman](https://github.com/juliusbrussee/caveman) |
 | impeccable | Apache-2.0; embedded references keep their MIT notices | Adapted from [pbakaus/impeccable](https://github.com/pbakaus/impeccable) and credited sources |

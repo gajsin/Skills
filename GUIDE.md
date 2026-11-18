@@ -33,6 +33,7 @@ every workflow.
 | `retro` | An agent session produced avoidable failures | Evidence, causes, and proposed corrections | Report/proposals; no automatic rule, hook, or memory edits |
 | `caveman` | Short, dry, grammatical agent replies | Session mode for concise wording | Preserves requested depth, facts, uncertainty, and required outputs |
 | `humanizer` | Write, edit, or summarize prose from supplied facts and context | Natural text in the intended voice | No setup form; preserve relevant facts and material limits; only authorized file edits |
+| `editor` | Prepare an article, post, or promotional copy, or edit a draft for publication | Chooses the relevant workflow and delivers the requested draft, outline, or review | Uses the project voice when known; no mandatory setup, no automatic publication; UI microcopy stays with Impeccable |
 | `impeccable` | Build, assess, or refine a UI | Selects and combines methods from one request | Review requests produce findings and may save review artifacts; improvement requests apply and verify fixes within scope |
 | `gsap` | GSAP is selected for a website animation | Scoped implementation; React and ScrollTrigger references loaded as needed | No migration of a suitable stack or dependency installation merely because the skill was invoked |
 | `logo-interview` | Find a logo direction through an interview and visual comparison | Agreed brief, viewed moodboard/direction, authorized studies or exports | Preserve originals and decision levels; no automatic site changes |
@@ -178,6 +179,7 @@ Agent SDK, invoke each skill in a separate turn when it is needed.
 | Explanatory illustration | `$visual-explainer Explain this idea with a finished illustration in the bundled monochrome design system.` |
 | Animated explanation | `$visual-explainer Animate this process; preserve its meaning and use the available video workflow.` |
 | Edit prose | `$humanizer Make this text natural; preserve its facts and voice.` |
+| Write for publication | `$editor Turn these notes into a practical article for beginners on my site.` |
 | Short session summary | `$humanizer $caveman Briefly describe what we did this session.` |
 | Provider change | `$model-provider-qualification Qualify this route within the agreed request cap before the full paid run.` |
 | Learn from a failed session | `$retro Review this session and propose the smallest corrections; do not change instructions.` |

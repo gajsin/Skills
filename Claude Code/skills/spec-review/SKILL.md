@@ -57,7 +57,10 @@ Look for the originating spec, in this order:
 
 ### 3. Identify the standards sources
 
-Applicable global and project instructions (`~/.claude/CLAUDE.md` and the project's `CLAUDE.md` files), plus repo documents such as `CODING_STANDARDS.md` or `CONTRIBUTING.md`. Respect the host's instruction precedence and the user's explicit requirements.
+Use `~/.claude/CLAUDE.md`, the project instructions loaded by Claude Code
+(`CLAUDE.md`, `AGENTS.md`, or both), and standards such as
+`CODING_STANDARDS.md` or `CONTRIBUTING.md`. Respect their precedence and the
+user's requirements.
 
 On top of whatever the repo documents, the Standards axis always carries the **smell baseline** below: a fixed set of Fowler code smells (_Refactoring_, ch.3) that applies even when a repo documents nothing. Two rules bind it:
 
@@ -105,9 +108,10 @@ justify independent review even in a short diff. A localized low-risk change nee
 self-review only; run Standards and Spec separately with the briefs below.
 
 When independent review is justified and available, launch the two axes in parallel
-as two Agent calls in one message, with self-contained input packets: the sub-agents
-do not see this conversation. Respect the user's explicit reviewer count or
-request for no delegation. If collaboration is unavailable, assess both axes yourself
+as two non-fork `Agent` calls with self-contained input packets. For source-only
+review, use a read-only role such as Explore when available and pass the applicable
+rules explicitly. Collect both completion results before aggregating. Honor the
+user's reviewer count and delegation limits. If collaboration is unavailable, assess both axes yourself
 and disclose any material limit. A missing spec still skips only the Spec axis.
 
 **Standards sub-agent prompt** should include:

@@ -127,9 +127,10 @@ contract. A localized low-risk edit needs self-review only. Risk takes precedenc
 over line count; many changed files alone are not a reason to delegate.
 
 When delegation is justified and available, separate architecture/spec from
-code/standards in two parallel reviews when both apply, as two Agent calls in one message. Supply
-self-contained inputs
-and verify each finding yourself. Respect an explicit request for no delegation or
+code/standards in two parallel, non-fork `Agent` calls when both apply. For
+source-only review, use a read-only role such as Explore when available. Include
+the applicable project rules and the diff in each brief. Collect the completion
+results before resolving findings, and verify each finding yourself. Respect an explicit request for no delegation or
 a particular reviewer count. If collaboration is unavailable, perform both reviews
 yourself and disclose any material verification limit.
 

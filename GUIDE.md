@@ -6,15 +6,18 @@ every workflow.
 
 ## Invocation and context
 
-- **Codex:** `$name`; the pack's skills set `allow_implicit_invocation: false`.
+- **Codex:** type `$name`. Desktop also lists enabled skills in the `/` menu. In CLI
+  and IDE use `/skills` to pick one. The pack sets `allow_implicit_invocation: false`.
 - **Claude Code:** `/name`; the pack's skills set `disable-model-invocation: true`. Stack
   skills at the start of the message, for example
   `/architecture-first /ponytail /spec-review Implement the agreed feature`. In the
   terminal one message expands the first skill and up to five more; through the
   Agent SDK or `claude -p` only the first expands. A `/name` after plain text is not
   loaded directly; it only permits Claude to invoke that skill in this message.
-- **Antigravity:** `/name` is the intended invocation. Manual-only wording is a
-  preference, not a documented technical prohibition on automatic selection.
+- **Antigravity:** use `/name`. The app can select skills automatically, while these
+  skills ask for explicit use. In CLI, use `/skills reload` after changing an
+  installation. CLI 1.5.16 and later also discover `~/.agents/skills/`, with
+  same-named skills under `~/.gemini/` taking precedence.
 - Instructions are English; interviews, explanations, and deliverables use the
   user's requested language.
 - Load supporting references only for the requested branch. Invoking every skill spends

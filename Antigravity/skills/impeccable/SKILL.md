@@ -3,8 +3,6 @@ name: impeccable
 description: "Designs, reviews, and improves user interfaces when explicitly invoked with /impeccable."
 version: 4.7.1
 license: Apache-2.0
-allowed-tools:
-  - Bash(npx impeccable *)
 ---
 
 <!-- Local host integration, 2026-10-25; author design rules preserved. -->
@@ -14,6 +12,7 @@ allowed-tools:
 - Activate only after the user explicitly invokes `/impeccable` or expressly asks to use Impeccable. Keep the upstream design rules and bans intact.
 - Resolve `<skill-base-dir>` to the actual SKILL.md directory, using the loaded path or the host’s configured skill directories. Keep cwd at the user’s project and provide that absolute launcher path to any delegate that needs it. In Unix shells use `"<skill-base-dir>/scripts/impeccable"`. In PowerShell use `& "<skill-base-dir>/scripts/impeccable.cmd"`.
 - Use the host's structured question tool when available, respecting its question and option limits. Ask in the user's language and wait for required answers. An asynchronous question returning immediately, or elapsed time alone, is not an answer or approval.
+- Delegate through the available Antigravity subagent tool (`invoke_subagent` where exposed). Use the registered Impeccable role when available. Otherwise send a fresh subagent the input packet plus the matching role body under [reference/degraded/](reference/degraded/), starting at its first heading. The first paragraph above that heading is for inline use only. If delegation is unavailable or disallowed, follow the same role inline and disclose the substitution.
 - Installing this skill does not enable automatic hooks or create shortcut skills. Enable hooks, pin shortcuts, or update the installation only when the user explicitly requests that action. An update notice is informational.
 
 This skill gives you the tools and permission to make design that earns the name out-of-distribution craft. Work as an award-winning design director would: production-grade code, a clear POV, a deep grasp of what the client and its users need, and exceptional craft.

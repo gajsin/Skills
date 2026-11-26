@@ -6,7 +6,7 @@ For a standalone critique, resolve one stable target, run the two assessments, a
 
 - If the user prohibits file writes, deliver the critique in chat. Apply that limit to both assessments, skip snapshot and temporary-file writes, and use only inspection and detector commands that respect it. Skip live-server or overlay setup that writes files. Report any missing evidence.
 - Assessment A (design review) and Assessment B (detector/browser evidence) are both required, except on a native platform (see Assessment Orchestration).
-- In standalone critique, Assessment A and B MUST run as two isolated sub-agents whenever a sub-agent/Task tool is exposed. Running them inline in this context is "possible" but is NOT permitted; it is a degraded run. Inline is allowed ONLY when no sub-agent tool exists (or the user declined, on harnesses that ask). Native platforms run A alone (see Assessment Orchestration).
+- In standalone critique, Assessment A and B MUST run as two isolated sub-agents whenever the Agent tool is exposed. Running them inline in this context is "possible" but is NOT permitted; it is a degraded run. Inline is allowed ONLY when no sub-agent tool exists (or the user declined, on harnesses that ask). Native platforms run A alone (see Assessment Orchestration).
 - If a standalone critique degrades, its report's first line MUST be a banner: `⚠️ DEGRADED: single-context (<reason>)`. A silent degraded critique is a failed critique.
 - Assessment A must finish before detector findings enter the parent synthesis context. Detector output is deterministic, but it still anchors judgment.
 - A skipped detector is a failed critique run unless it is unavailable under the requested write limits, `impeccable detect` is missing or crashes after a real attempt, or the platform is native (see Assessment Orchestration).
@@ -35,12 +35,12 @@ For a combined workflow, use independent assessment when it is available and alr
 
 **Native platforms** (`ios` / `android` / `adaptive`): Assessment B does not apply, because `impeccable detect` and the browser overlay read only web markup. Run Assessment A alone in this context and skip both sub-agent gates below, the Codex permission question included: with no B there is nothing to isolate A from, so this is the complete native method and carries no degraded banner. Do not run `impeccable detect` on native source; its empty result reads as clean.
 
-When delegating, use distinct sub-agents for Assessments A and B, and keep their outputs separate until synthesis.
+When delegating, use distinct non-fork agents for Assessments A and B. Collect both reports before synthesis, using completion notifications when they run in the background.
 
 Standalone sub-agent gate (all harnesses):
-- Unless a harness-specific gate below overrides this, spawn A and B as two isolated, parallel sub-agents whenever a sub-agent/Task tool is exposed. This is the default and is mandatory; do not run them inline because it is faster.
+- Unless a harness-specific gate below overrides this, spawn A and B as two isolated, parallel sub-agents whenever the Agent tool is exposed. This is the default and is mandatory; do not run them inline because it is faster.
 - Desktop apps (see **Desktop apps** under Assessment B) are the one exception to parallel: both sub-agents would drive the app's single window at once. Seed the window, spawn A, wait until it has finished and put the window back, then spawn B. They are still two isolated sub-agents, so this is not the degraded path.
-- "Unavailable" means exactly one thing: no sub-agent/Task tool is exposed in this session (or, on harnesses that ask, the user declined). It does not mean inconvenient.
+- "Unavailable" means exactly one thing: no Agent tool is exposed in this session (or, on harnesses that ask, the user declined). It does not mean inconvenient.
 - If and only if sub-agents are unavailable, fall back sequentially: finish and record Assessment A, then run Assessment B, then synthesize, and emit the degraded banner.
 - Whichever path you take, declare it in the report header (see Report header provenance). Skipping sub-agents without the banner is the most common failure of this command.
 

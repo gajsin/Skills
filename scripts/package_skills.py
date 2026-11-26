@@ -15,9 +15,10 @@ LOCATIONS = {
     'claude': '~/.claude/skills',
 }
 POLICIES = {
-    'codex': 'Codex invocation policies are included.',
-    'antigravity': ("Antigravity can select skills automatically. The skill descriptions request\n"
-                    'explicit invocation. App/IDE and CLI read the location above. CLI copies in\n'
+    'codex': ('Codex invocation policies are included. For Impeccable native roles, copy\n'
+              '`skills/impeccable/agents/*.toml` into `~/.codex/agents/` or the project\'s\n'
+              '`.codex/agents/`. Keep `agents/openai.yaml` in the skill folder.'),
+    'antigravity': ("Keep the Antigravity copy in the location above. CLI copies in\n"
                     '`~/.gemini/antigravity-cli/skills` or `~/.gemini/skills` take priority.'),
     'claude': ('Every skill sets `disable-model-invocation: true`. Copy the files in\n'
                '`agents/` to `~/.claude/agents` for the Impeccable helper agents.'),

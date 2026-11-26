@@ -37,7 +37,7 @@ Write a concrete action with a clear stopping condition. Keep each rule in one
 appropriate place and load conditional detail only when relevant:
 
 - A lasting rule across projects belongs in the user's global `~/.claude/CLAUDE.md`.
-- A project-specific requirement belongs in that project's `CLAUDE.md`.
+- A project-specific requirement belongs in the project's active instructions, `CLAUDE.md` or `AGENTS.md`.
 - An occasional procedure belongs in an explicitly invoked skill.
 - A mechanical condition belongs in an existing linter, test, CI check, or a hook in `settings.json`.
 - A stable user or project fact belongs in host-supported memory when appropriate.

@@ -77,16 +77,31 @@ installation. Restart the agent if the changes do not appear.
 
 Antigravity CLI also reads `~/.gemini/antigravity-cli/skills/` and
 `~/.gemini/skills/`. Copies there take priority over the shared directory.
-[Antigravity skill discovery](https://antigravity.google/docs/customization-discovery/)
+CLI 1.5.16 and later also load `~/.agents/skills/`, with same-named skills
+under `~/.gemini/` taking precedence. Run `/skills reload` after updating skills
+in an open CLI session. See [skill discovery](https://antigravity.google/docs/customization-discovery/)
+and the [CLI changelog](https://antigravity.google/docs/changelog?tab=hub#v1.5.16).
 
-When installing Impeccable for Claude Code, also copy `Claude Code/agents/*`
-into `~/.claude/agents/`.
+### Install Impeccable helper roles
+
+| Host | Copy | Into |
+|---|---|---|
+| Codex | `Codex/skills/impeccable/agents/*.toml` | `~/.codex/agents/` or the project's `.codex/agents/` |
+| Claude Code | `Claude Code/agents/*.md` | `~/.claude/agents/` or the project's `.claude/agents/` |
+
+Use one registration per role. The Codex role names use hyphens. Keep
+`agents/openai.yaml` inside the skill folder. Antigravity Impeccable can delegate
+from bundled role instructions on its own.
+
+The Claude Code paths above are for local sessions. SSH sessions use the remote
+home folder. Cloud sessions can load skills from the checked-out project.
+[Desktop skills](https://code.claude.com/docs/en/desktop#use-skills)
 
 `gsap` replaces `gsap-react` and `gsap-scrolltrigger`. Install the complete new
 `gsap/` directory, verify it is available, then remove those two old directories
 from your personal skills location. Copying a new pack alone does not remove them.
 
-The following examples install the full Claude Code pack from a repository checkout:
+### Install the Claude Code pack from a checkout
 
 ```bash
 mkdir -p ~/.claude/skills ~/.claude/agents
@@ -163,9 +178,10 @@ python scripts/package_skills.py --platform antigravity --output dist/antigravit
 ```
 
 Archives provide optional bulk downloads for the website and offline installation.
-Each holds the skills (and, for Claude Code, the agents), a README with installation,
-the skill guide, and a license table. The author's global rules and Git history are
-excluded. Individual skills can also be installed directly from the public repository.
+Each holds the skills, installation and role setup instructions, the skill guide,
+and a license table. Claude Code also includes its helper roles in `agents/`.
+The author's global rules and Git history are excluded. Individual skills can
+also be installed directly from the public repository.
 
 ## Licenses
 

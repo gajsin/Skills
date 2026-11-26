@@ -44,14 +44,9 @@ Standalone sub-agent gate (all harnesses):
 - If and only if sub-agents are unavailable, fall back sequentially: finish and record Assessment A, then run Assessment B, then synthesize, and emit the degraded banner.
 - Whichever path you take, declare it in the report header (see Report header provenance). Skipping sub-agents without the banner is the most common failure of this command.
 
-Codex sub-agent gate (overrides the default above; Codex's permission model requires asking before spawning):
-- Asking is the normal path, not a degradation. Approving and spawning is the dual-agent path; do not emit the degraded banner just for asking.
-- If `spawn_agent` is exposed and the user explicitly allowed sub-agents, delegation, or parallel agent work, spawn A and B immediately (for a desktop app, A first and B once A has finished, as the default gate above says).
-- If `spawn_agent` is exposed but the user did not explicitly allow sub-agents, ask exactly once: "Impeccable critique is designed to run two independent sub-agents for an unanchored assessment. May I use sub-agents for this critique?" Then stop until the user answers.
-- If allowed, spawn A and B (in sequence for a desktop app). If declined, run sequentially and lead the report with `⚠️ DEGRADED: single-context (sub-agents declined by user)`.
-- If `spawn_agent` is not exposed, do not ask; run sequentially and lead with `⚠️ DEGRADED: single-context (spawn_agent unavailable in this session)`.
-- If spawning fails after permission, run sequentially and lead with `⚠️ DEGRADED: single-context (sub-agent spawn failed: <exact error>)`.
-Use `fork_turns: "none"` with self-contained prompts containing cwd, target, live URL, references, product context, output contract, write limits, and the absolute launcher path where needed.
+Codex sub-agent gate:
+- Use the exposed subagent tool when the user or applicable project or skill instructions authorize delegation. Follow any approval required by this session. If delegation is declined, unavailable, or fails, run both passes in order and record the specific reason in the degraded banner.
+- Isolate each assessment from the source conversation. For `spawn_agent` use `fork_turns: "none"` or `fork_context: false`, according to the exposed schema. Pass cwd, target, live URL, references, product context, output contract, write limits, and the absolute launcher path when needed.
 
 If browser automation is available, each assessment creates its own new tab. Never reuse an existing tab, even if it is already at the right URL. Desktop apps are the exception (see **Desktop apps** under Assessment B).
 

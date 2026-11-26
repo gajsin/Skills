@@ -15,6 +15,12 @@ Core principles:
 - Scale ambition to the surface's mode (see Modes). Persuade and Experience get full commitment: bold, distinct work with a point of view. On Operate and Read, ambition shows as precision and restraint, and patterns the visitor already knows earn their place.
 - Verify by looking at the rendered result at the sizes it ships at, and batch the checks: fix what one look shows before looking again, rather than screenshotting after every tweak.
 
+## Claude Code tools
+
+Use a named, non-fork `Agent` for an independent pass. When Claude Code runs it in the background, continue with independent work and resume the dependent step on its completion notification. Use `SendMessage` with the agent ID for a follow-up when the session supports it. If delegated work cannot return within a live event's deadline, use the inline path before assigning a writer.
+
+Use `AskUserQuestion` for decisions when available. If it is unavailable, errors, or times out, ask in chat and wait when the task requires the user's decision.
+
 ## Setup
 
 For a critique with a no-write restriction, skip the launcher bootstrap and `context`. Read any existing PRODUCT.md, DESIGN.md, and relevant surface brief directly, then follow the critique reference. Use only detector execution that can use an installed engine without writing files.

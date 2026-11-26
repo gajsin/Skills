@@ -3,9 +3,11 @@
 """Protect the public card contract used by the portfolio's release reader."""
 from pathlib import Path
 from tempfile import TemporaryDirectory
+import hashlib
 import json
 import unittest
 from unittest.mock import patch
+from zipfile import ZipFile
 
 import publish_manifest
 
@@ -38,21 +40,6 @@ class CatalogueTests(unittest.TestCase):
         for cards in ({'first': self.card}, {'first': self.card, 'second': self.card, 'removed': self.card}):
             with self.subTest(cards=cards), self.assertRaisesRegex(ValueError, 'does not match'):
                 self.read(cards)
-
-    def test_platform_files_override_only_their_own_pack(self):
-        shared = self.root / 'skills/second/SKILL.md'
-        override = self.root / 'platforms/claude/skills/second/SKILL.md'
-        override.parent.mkdir(parents=True)
-        override.touch()
-        self.assertEqual(publish_manifest.skill_files(self.root, 'claude')['second/SKILL.md'], override.resolve())
-        self.assertEqual(publish_manifest.skill_files(self.root, 'codex')['second/SKILL.md'], shared.resolve())
-
-    def test_platform_file_without_shared_skill_blocks_publication(self):
-        stale = self.root / 'platforms/codex/skills/removed/something.md'
-        stale.parent.mkdir(parents=True)
-        stale.touch()
-        with self.assertRaisesRegex(ValueError, 'no shared skill directory'):
-            publish_manifest.skill_files(self.root, 'codex')
 
     def test_invalid_card_fields_block_publication(self):
         bad_cards = [None, [], {**self.card, 'extra': 'unsupported'}]
@@ -124,6 +111,32 @@ class JournalTests(unittest.TestCase):
                          [platform, shared, first])
         changed = publish_manifest.skill_updates(dict.fromkeys(('old', 'moved', 'shared', 'native')))
         self.assertEqual({name for entry in changed for name in entry['skills']}, {'old', 'shared', 'native'})
+
+    def test_release_profiles_share_one_complete_archive(self):
+        card = {'group': 'Writing', 'use': 'Edit', 'result': 'Draft', 'edits': 'Requested text'}
+        skill = self.root / 'skills/humanizer'
+        skill.mkdir(parents=True)
+        text = b'---\nname: humanizer\ndescription: Edit prose.\nlicense: MIT\n---\n'
+        (skill / 'SKILL.md').write_bytes(text)
+        (skill / 'LICENSE').touch()
+        (self.root / 'scripts').mkdir()
+        (self.root / 'scripts/LICENSE').touch()
+        (self.root / 'GUIDE.md').write_text('# Guide\n', encoding='utf-8')
+        (self.root / 'catalog.json').write_text(json.dumps({'humanizer': card}), encoding='utf-8')
+        self.git('add', '.')
+        self.git('commit', '--quiet', '--no-gpg-sign', '-m', 'Add skill')
+
+        output = self.root / 'release'
+        base = 'https://example.test/release'
+        manifest = publish_manifest.build_manifest(output, base)
+        archive = output / 'gajsin-skills.zip'
+        self.assertEqual(set(output.iterdir()), {archive, output / 'skills.json'})
+        self.assertEqual(manifest['skills'][0]['description'], 'Edit prose.')
+        self.assertEqual({p['platform'] for p in manifest['packs']}, {'codex', 'claude', 'antigravity'})
+        self.assertEqual({p['url'] for p in manifest['packs']}, {f'{base}/{archive.name}'})
+        self.assertEqual({p['sha256'] for p in manifest['packs']}, {hashlib.sha256(archive.read_bytes()).hexdigest()})
+        with ZipFile(archive) as packed:
+            self.assertEqual(packed.read('skills/humanizer/SKILL.md'), text)
 
 
 if __name__ == '__main__':

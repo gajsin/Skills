@@ -6,16 +6,12 @@ on:
     paths:
       - 'skills/spec-review/scripts/**'
       - 'skills/spec-review/patches/**'
-      - 'platforms/*/skills/spec-review/scripts/**'
-      - 'platforms/*/skills/spec-review/patches/**'
       - 'tests/test_mutator_windows.py'
       - '.github/workflows/quality-tools.yml'
   pull_request:
     paths:
       - 'skills/spec-review/scripts/**'
       - 'skills/spec-review/patches/**'
-      - 'platforms/*/skills/spec-review/scripts/**'
-      - 'platforms/*/skills/spec-review/patches/**'
       - 'tests/test_mutator_windows.py'
       - '.github/workflows/quality-tools.yml'
   workflow_dispatch:

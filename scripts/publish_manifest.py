@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2026 gajsin
-"""Build the three host archives and skills.json, the manifest that gajsin.tech reads from the release."""
+"""Build the shared archive and its public release manifest."""
 from pathlib import Path
 from datetime import datetime, timezone
 import argparse
@@ -8,7 +8,7 @@ import json
 import re
 import subprocess
 
-from package_skills import LOCATIONS, ORIGINS, PLATFORMS, build_bundle, skill_dirs, skill_files
+from package_skills import BUNDLE_NAME, LOCATIONS, ORIGINS, PLATFORMS, build_bundle, skill_dirs
 
 REPO = Path(__file__).resolve().parents[1]
 CARD_FIELDS = {'group', 'use', 'result', 'edits'}
@@ -84,7 +84,7 @@ def journal_changes(commit, previous=None):
 
 
 def skill_updates(catalog):
-    # One journal entry per day: which skills changed in any host edition.
+    # One journal entry per day with the names of the edited skills.
     updates = []
     log = git('log', '--date=short', '--format=%x1e%cs', '--name-only', *JOURNAL_FILTER, '--', *SKILL_PATHS)
     for block in filter(None, log.split('\x1e')):
@@ -104,19 +104,16 @@ def skill_updates(catalog):
 def build_manifest(output, download_base, previous=None):
     commit, date = git('log', '-1', '--format=%H %cs').split(' ')
     catalog = load_catalog()
-    sources = skill_files(REPO, 'claude')
     skills = []
     for name, card in catalog.items():
-        text = sources[f'{name}/SKILL.md'].read_text(encoding='utf-8')
+        text = (REPO / 'skills' / name / 'SKILL.md').read_text(encoding='utf-8')
         skills.append({'name': name, 'description': field(text, 'description', name),
                        'license': field(text, 'license', name), 'origin': ORIGINS[name], **card})
-    packs = []
-    for platform, title in PLATFORMS.items():
-        name = f'gajsin-skills-{platform}.zip'
-        result = build_bundle(REPO, platform, output / name)
-        packs.append({'platform': platform, 'title': title, 'url': f'{download_base}/{name}',
-                      'bytes': result['bytes'], 'sha256': result['sha256'],
-                      'location': LOCATIONS[platform], 'invoke': '$' if platform == 'codex' else '/'})
+    result = build_bundle(REPO, output / BUNDLE_NAME)
+    packs = [{'platform': platform, 'title': title, 'url': f'{download_base}/{BUNDLE_NAME}',
+              'bytes': result['bytes'], 'sha256': result['sha256'],
+              'location': LOCATIONS[platform], 'invoke': '$' if platform == 'codex' else '/'}
+             for platform, title in PLATFORMS.items()]
     manifest = {'source': {'repository': 'gajsin/Skills', 'commit': commit, 'date': date},
                 'packs': packs, 'skills': skills, 'updates': skill_updates(catalog),
                 'changes': journal_changes(commit, previous)}

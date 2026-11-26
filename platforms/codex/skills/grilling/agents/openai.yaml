@@ -1,6 +1,0 @@
-interface:
-  display_name: "Grilling"
-  short_description: "Deep requirements and design interview"
-
-policy:
-  allow_implicit_invocation: false

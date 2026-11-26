@@ -1,6 +1,0 @@
-interface:
-  display_name: "Logo Interview"
-  short_description: "Logo discovery interview and visual direction"
-  default_prompt: "Use $logo-interview to interview me and develop a clear visual direction for a logo."
-policy:
-  allow_implicit_invocation: false

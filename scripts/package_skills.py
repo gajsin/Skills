@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2026 gajsin
-"""Build reviewed source-only download bundles with per-skill licenses."""
+"""Build the source archive with per-skill licenses."""
 from pathlib import Path
 import argparse
 import hashlib
@@ -9,19 +9,11 @@ import re
 import zipfile
 
 PLATFORMS = {'codex': 'Codex', 'antigravity': 'Antigravity', 'claude': 'Claude Code'}
+BUNDLE_NAME = 'gajsin-skills.zip'
 LOCATIONS = {
     'codex': '~/.agents/skills',
     'antigravity': '~/.gemini/config/skills',
     'claude': '~/.claude/skills',
-}
-POLICIES = {
-    'codex': ('Codex invocation policies are included. For Impeccable native roles, copy\n'
-              '`skills/impeccable/agents/*.toml` into `~/.codex/agents/` or the project\'s\n'
-              '`.codex/agents/`. Keep `agents/openai.yaml` in the skill folder.'),
-    'antigravity': ("Keep the Antigravity copy in the location above. CLI copies in\n"
-                    '`~/.gemini/antigravity-cli/skills` or `~/.gemini/skills` take priority.'),
-    'claude': ('Every skill sets `disable-model-invocation: true`. Copy the files in\n'
-               '`agents/` to `~/.claude/agents` for the Impeccable helper agents.'),
 }
 ORIGINS = {
     **{name: 'https://github.com/mattpocock/skills/tree/5beb35b' for name in
@@ -45,43 +37,36 @@ def skill_dirs(root):
     return sorted(p for p in root.iterdir() if p.is_dir() and (p / 'SKILL.md').is_file())
 
 
-def platform_dir(repo_root, platform):
-    return repo_root / 'platforms' / platform
-
-
-def skill_files(repo_root, platform):
-    shared = (repo_root / 'skills').resolve()
-    overlay = (platform_dir(repo_root, platform) / 'skills').resolve()
-    skills = {path.name for path in skill_dirs(shared)}
+def skill_files(root):
+    root = root.resolve()
+    skills = {path.name for path in skill_dirs(root)}
     if not skills:
         raise ValueError('No skills found.')
     files = {}
-    for root in (shared, overlay):
-        for path in sorted(root.rglob('*')):
-            rel = path.relative_to(root)
-            if any(part in SKIP_DIRS for part in rel.parts) or path.suffix in {'.pyc', '.pyo'}:
-                continue
-            if path.is_symlink():
-                raise ValueError(f'Resolve symlinks before packaging: {rel}')
-            if not path.is_file():
-                continue
-            if len(rel.parts) < 2 or rel.parts[0] not in skills:
-                raise ValueError(f'File has no shared skill directory: {path}')
-            if root not in path.resolve().parents or any(part.startswith('.env') for part in rel.parts):
-                raise ValueError(f'Unexpected source path: {rel}')
-            if path.suffix.lower() in {'.exe', '.dll', '.so', '.dylib'}:
-                raise ValueError(f'Runtime binaries do not belong in this source bundle: {rel}')
-            files[rel.as_posix()] = path
+    for path in sorted(root.rglob('*')):
+        rel = path.relative_to(root)
+        if any(part in SKIP_DIRS for part in rel.parts) or path.suffix in {'.pyc', '.pyo'}:
+            continue
+        if path.is_symlink():
+            raise ValueError(f'Resolve symlinks before packaging: {rel}')
+        if not path.is_file():
+            continue
+        if len(rel.parts) < 2 or rel.parts[0] not in skills:
+            raise ValueError(f'File has no skill directory: {path}')
+        if root not in path.resolve().parents or any(part.startswith('.env') for part in rel.parts):
+            raise ValueError(f'Unexpected source path: {rel}')
+        if path.suffix.lower() in {'.exe', '.dll', '.so', '.dylib'}:
+            raise ValueError(f'Runtime binaries do not belong in this source bundle: {rel}')
+        files[rel.as_posix()] = path
     return files
 
 
-def build_bundle(repo_root, platform, output):
+def build_bundle(repo_root, output):
+    root = (repo_root / 'skills').resolve()
     output = output.resolve()
-    for source in (repo_root / 'skills', platform_dir(repo_root, platform)):
-        root = source.resolve()
-        if root == output or root in output.parents:
-            raise ValueError('The archive must be outside the skill source directories.')
-    sources = skill_files(repo_root, platform)
+    if root == output or root in output.parents:
+        raise ValueError('The archive must be outside the skill source directory.')
+    sources = skill_files(root)
     skills = sorted(name.removesuffix('/SKILL.md') for name in sources if name.count('/') == 1
                     and name.endswith('/SKILL.md'))
     files = []
@@ -98,25 +83,19 @@ def build_bundle(repo_root, platform, output):
         license_name = license_match.group(1).strip().strip('\"\'')
         rows.append(f'| [{skill}](skills/{skill}/SKILL.md) | [{license_name}](skills/{skill}/LICENSE) | [Source]({ORIGINS[skill]}) |')
     files.extend((f'skills/{name}', path.read_bytes()) for name, path in sources.items())
-    agents = platform_dir(repo_root, platform) / 'agents'
-    if agents.is_dir():
-        for path in sorted(agents.glob('*.md')):
-            files.append(('agents/' + path.name, path.read_bytes()))
-    marker = '$' if platform == 'codex' else '/'
-    location = LOCATIONS[platform]
+    locations = '\n'.join(f'| {title} | `{LOCATIONS[host]}` |' for host, title in PLATFORMS.items())
     # GUIDE.md is the single source; its headings move one level down inside the README.
     guide = ''.join('#' + line if line.startswith('#') else line
                     for line in (repo_root / 'GUIDE.md').read_text(encoding='utf-8').splitlines(True))
-    readme = f'''# {PLATFORMS[platform]} Skill Pack
+    readme = f'''# Agent Skills
 
 Reusable English instructions; agents should respond in the user's language.
-Copy the individual directories inside `skills/` to `{location}`. Keep each
-directory intact, including its LICENSE, notices, references, and helpers.
-Create the destination directory if needed. Copying updates matching files; it
-does not remove obsolete files from an existing installation.
+Copy each complete directory you want from `skills/` into the skill directory for
+your agent. Keep its license, references, and helpers together.
 
-Invoke a skill explicitly, for example `{marker}grilling` or `{marker}logo-interview`.
-{POLICIES[platform]}
+| Host | Skill directory |
+|---|---|
+{locations}
 
 These are original skills and attributed adaptations, not a claim that every skill
 was written from scratch. The root LICENSE covers the pack-owned README and
@@ -144,14 +123,13 @@ Skills guide behavior; they do not guarantee correctness or production readiness
             info.compress_type = zipfile.ZIP_DEFLATED
             info.external_attr = (0o100755 if data.startswith(b'#!') else 0o100644) << 16
             archive.writestr(info, data)
-    return {'platform': platform, 'skills': len(skills), 'files': len(files),
+    return {'skills': len(skills), 'files': len(files),
             'sha256': hashlib.sha256(output.read_bytes()).hexdigest(), 'bytes': output.stat().st_size}
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--platform', choices=PLATFORMS, required=True)
     parser.add_argument('--output', type=Path, required=True)
     args = parser.parse_args()
-    result = build_bundle(Path(__file__).resolve().parents[1], args.platform, args.output)
+    result = build_bundle(Path(__file__).resolve().parents[1], args.output)
     print(json.dumps(result))

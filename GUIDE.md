@@ -7,8 +7,8 @@ every workflow.
 ## Invocation and context
 
 - **Codex:** type `$name`. Desktop also lists enabled skills in the `/` menu. In CLI
-  and IDE use `/skills` to pick one. The pack sets `allow_implicit_invocation: false`.
-- **Claude Code:** `/name`; the pack's skills set `disable-model-invocation: true`. Stack
+  and IDE use `/skills` to pick one.
+- **Claude Code:** use `/name`. Stack
   skills at the start of the message, for example
   `/architecture-first /ponytail /spec-review Implement the agreed feature`. In the
   terminal one message expands the first skill and up to five more; through the
@@ -196,5 +196,4 @@ Use `$caveman` or `$ponytail` as session modes where useful; `off` ends either m
 This pack has static consistency and packaging checks. Those checks do not prove
 successful behavior on every real task. Native questions, delegation, browsing,
 image generation, and runtime checks depend on the active host and permissions.
-Keep each host's intended Impeccable build; differing author design bans are not
-automatically a synchronization error.
+Configure any additional invocation policies or registered roles in your own agent.

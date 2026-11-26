@@ -1,7 +1,0 @@
-interface:
-  display_name: "Editor"
-  short_description: "Articles, posts, and publication editing"
-  default_prompt: "Use $editor to prepare the requested text for publication."
-
-policy:
-  allow_implicit_invocation: false

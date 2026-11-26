@@ -29,15 +29,6 @@ def hashes(root):
             and ".metrics" not in p.relative_to(root).parts and "__pycache__" not in p.parts}
 
 
-class SharedQualityToolTests(unittest.TestCase):
-    def test_host_editions_share_quality_tool_sources(self):
-        for edition in (REPO / "platforms").iterdir():
-            for directory in ("scripts", "patches"):
-                with self.subTest(platform=edition.name, directory=directory):
-                    overlay = edition / "skills/spec-review" / directory
-                    self.assertFalse(hashes(overlay), f"Keep {directory} shared across all packs")
-
-
 class MutationTests(unittest.TestCase):
     def setUp(self):
         self.temporary = tempfile.TemporaryDirectory(prefix="mutator-native-")

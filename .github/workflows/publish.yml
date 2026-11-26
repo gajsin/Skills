@@ -1,5 +1,5 @@
-# Rebuild the release archives after every push to main.
-# One release, tag "skills", always holds the archives and skills.json of the latest main;
+# Rebuild the release archive after every push to main.
+# The release holds the shared archive and skills.json of the latest main;
 # gajsin.tech reads the catalogue and journal from skills.json.
 name: Publish archives
 
@@ -30,7 +30,7 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Build archives and skills.json
+      - name: Build archive and skills.json
         run: |
           previous=()
           if gh release view skills --json assets --jq '.assets[].name' | grep -Fxq skills.json; then
@@ -47,13 +47,13 @@ jobs:
 
       - name: Publish the release
         run: |
-          notes="Archives for Codex, Claude Code and Antigravity, built from ${SKILLS_COMMIT}. Rebuilt on every push to main."
+          notes="One shared skill archive for Codex, Claude Code and Antigravity, built from ${SKILLS_COMMIT}."
           if gh release view skills > /dev/null 2>&1; then
-            gh release upload skills "$RUNNER_TEMP/dist"/*.zip --clobber
+            gh release upload skills "$RUNNER_TEMP/dist/gajsin-skills.zip" --clobber
             gh release upload skills "$RUNNER_TEMP/dist"/skills.json --clobber
             gh release edit skills --notes "$notes"
           else
-            gh release create skills "$RUNNER_TEMP/dist"/*.zip "$RUNNER_TEMP/dist"/skills.json --title "Skills" --notes "$notes" --latest
+            gh release create skills "$RUNNER_TEMP/dist/gajsin-skills.zip" "$RUNNER_TEMP/dist/skills.json" --title "Skills" --notes "$notes" --latest
           fi
 
       - name: Refresh the portfolio cache

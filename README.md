@@ -40,8 +40,7 @@ Codex/skills/          skills for Codex, with agents/openai.yaml invocation poli
 Claude Code/skills/    skills for Claude Code
 Claude Code/agents/    Impeccable helper agents for Claude Code
 Antigravity/skills/    skills for Antigravity
-Codex/AGENTS.md, Antigravity/GEMINI.md, Claude Code/CLAUDE.md
-                       the author's own always-on rules (Russian), optional
+AGENTS.md              shared working principles (Russian)
 GUIDE.md               choosing and combining skills
 catalog.json           public Russian skill cards and their display order
 scripts/               builder for release archives
@@ -113,8 +112,17 @@ Copy-Item -Recurse -Force "Claude Code\skills\*" "$env:USERPROFILE\.claude\skill
 Copy-Item -Force "Claude Code\agents\*" "$env:USERPROFILE\.claude\agents"
 ```
 
-The author's global rules files are not required by any skill. Read them before
-use: copying one replaces your own `AGENTS.md`, `GEMINI.md`, or `CLAUDE.md`.
+### Optional personal rules
+
+To use the repository's [working principles](AGENTS.md) across your projects,
+copy the contents of `AGENTS.md` to the personal rules file for your host.
+Review your existing rules before replacing them.
+
+| Host | Personal rules file |
+|---|---|
+| Codex | `~/.codex/AGENTS.md` |
+| Antigravity | `~/.gemini/config/GEMINI.md` |
+| Claude Code | `~/.claude/CLAUDE.md` |
 
 Impeccable downloads its official engine, with checksum verification, on first use.
 
@@ -178,8 +186,8 @@ python scripts/package_skills.py --platform antigravity --output dist/antigravit
 Archives provide optional bulk downloads for the website and offline installation.
 Each holds the skills, installation and role setup instructions, the skill guide,
 and a license table. Claude Code also includes its helper roles in `agents/`.
-The author's global rules and Git history are excluded. Individual skills can
-also be installed directly from the public repository.
+The archives exclude the repository's `AGENTS.md` and Git history. Individual
+skills can also be installed directly from the public repository.
 
 ## Licenses
 

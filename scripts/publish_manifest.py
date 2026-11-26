@@ -8,27 +8,28 @@ import json
 import re
 import subprocess
 
-from package_skills import LOCATIONS, ORIGINS, PLATFORMS, build_bundle, skill_dirs
+from package_skills import LOCATIONS, ORIGINS, PLATFORMS, build_bundle, skill_dirs, skill_files
 
 REPO = Path(__file__).resolve().parents[1]
 CARD_FIELDS = {'group', 'use', 'result', 'edits'}
-JOURNAL_PATHS = (*(f'{edition}/skills' for edition in PLATFORMS.values()), 'catalog.json')
+# Keep the former paths so the journal can be rebuilt from the existing history.
+SKILL_PATHS = ('skills', *(f'platforms/{host}/skills' for host in PLATFORMS),
+               *(f'{edition}/skills' for edition in PLATFORMS.values()))
+JOURNAL_FILTER = ('--invert-grep', '--grep=^Skill-Journal: skip$')
 JOURNAL_SIZE = 20
 
 
 def load_catalog():
-    """Require a complete card for each skill in each host edition."""
+    """Require a complete card for each shared skill."""
     catalog = json.loads((REPO / 'catalog.json').read_text(encoding='utf-8'))
     if not isinstance(catalog, dict):
         raise ValueError('catalog.json must contain an object keyed by skill name')
     card_names = set(catalog)
-    for edition in PLATFORMS.values():
-        directory = REPO / edition / 'skills'
-        skill_names = {path.name for path in skill_dirs(directory)}
-        missing = sorted(card_names - skill_names)
-        extra = sorted(skill_names - card_names)
-        if missing or extra:
-            raise ValueError(f'catalog.json does not match {edition}: missing skills={missing}, extra skills={extra}')
+    skill_names = {path.name for path in skill_dirs(REPO / 'skills')}
+    missing = sorted(card_names - skill_names)
+    extra = sorted(skill_names - card_names)
+    if missing or extra:
+        raise ValueError(f'catalog.json does not match skills/: missing skills={missing}, extra skills={extra}')
     for name, card in catalog.items():
         if not isinstance(card, dict) or set(card) != CARD_FIELDS:
             raise ValueError(f'{name}: the catalogue card must have group, use, result and edits')
@@ -69,7 +70,8 @@ def journal_changes(commit, previous=None):
             revision = f'{old_commit}..{commit}'
             old_changes = previous['changes']
 
-    log = git('log', '-z', f'-{JOURNAL_SIZE}', '--format=%H%x00%cI%x00%B', revision, '--', *JOURNAL_PATHS)
+    log = git('log', '-z', f'-{JOURNAL_SIZE}', '--format=%H%x00%cI%x00%B', *JOURNAL_FILTER, revision,
+              '--', *SKILL_PATHS, 'catalog.json')
     fields = log.removesuffix('\x00').split('\x00') if log else []
     changes = []
     for sha, date, message in zip(fields[::3], fields[1::3], fields[2::3], strict=True):
@@ -81,13 +83,31 @@ def journal_changes(commit, previous=None):
     return sorted(unique.values(), key=lambda change: change['date'], reverse=True)[:JOURNAL_SIZE]
 
 
+def skill_updates(catalog):
+    # One journal entry per day: which skills changed in any host edition.
+    updates = []
+    log = git('log', '--date=short', '--format=%x1e%cs', '--name-only', *JOURNAL_FILTER, '--', *SKILL_PATHS)
+    for block in filter(None, log.split('\x1e')):
+        day, *files = block.strip().split('\n')
+        names = {path[len(directory) + 1:].split('/', 1)[0]
+                 for path in files for directory in SKILL_PATHS if path.startswith(directory + '/')}
+        changed = sorted(names & catalog.keys())
+        if not changed:
+            continue
+        if updates and updates[-1]['date'] == day:
+            updates[-1]['skills'] = sorted(set(updates[-1]['skills']) | set(changed))
+        else:
+            updates.append({'date': day, 'skills': changed})
+    return updates[:12]
+
+
 def build_manifest(output, download_base, previous=None):
     commit, date = git('log', '-1', '--format=%H %cs').split(' ')
-    folder = REPO / PLATFORMS['claude'] / 'skills'
     catalog = load_catalog()
+    sources = skill_files(REPO, 'claude')
     skills = []
     for name, card in catalog.items():
-        text = (folder / name / 'SKILL.md').read_text(encoding='utf-8')
+        text = sources[f'{name}/SKILL.md'].read_text(encoding='utf-8')
         skills.append({'name': name, 'description': field(text, 'description', name),
                        'license': field(text, 'license', name), 'origin': ORIGINS[name], **card})
     packs = []
@@ -97,21 +117,8 @@ def build_manifest(output, download_base, previous=None):
         packs.append({'platform': platform, 'title': title, 'url': f'{download_base}/{name}',
                       'bytes': result['bytes'], 'sha256': result['sha256'],
                       'location': LOCATIONS[platform], 'invoke': '$' if platform == 'codex' else '/'})
-    # One journal entry per day: which skills changed in any host edition.
-    updates = []
-    log = git('log', '--date=short', '--format=%x1e%cs', '--name-only', '--',
-              *(f'{edition}/skills' for edition in PLATFORMS.values()))
-    for block in filter(None, log.split('\x1e')):
-        day, *files = block.strip().split('\n')
-        changed = sorted({parts[2] for parts in (path.split('/') for path in files) if len(parts) > 3 and parts[2] in catalog})
-        if not changed:
-            continue
-        if updates and updates[-1]['date'] == day:
-            updates[-1]['skills'] = sorted(set(updates[-1]['skills']) | set(changed))
-        else:
-            updates.append({'date': day, 'skills': changed})
     manifest = {'source': {'repository': 'gajsin/Skills', 'commit': commit, 'date': date},
-                'packs': packs, 'skills': skills, 'updates': updates[:12],
+                'packs': packs, 'skills': skills, 'updates': skill_updates(catalog),
                 'changes': journal_changes(commit, previous)}
     (output / 'skills.json').write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
     return manifest

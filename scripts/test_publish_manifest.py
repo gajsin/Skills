@@ -19,11 +19,10 @@ class CatalogueTests(unittest.TestCase):
         patcher.start()
         self.addCleanup(patcher.stop)
         self.card = {'group': 'Дизайн', 'use': 'Задача', 'result': 'Результат', 'edits': 'Границы'}
-        for edition in publish_manifest.PLATFORMS.values():
-            for name in ('first', 'second'):
-                skill = self.root / edition / 'skills' / name
-                skill.mkdir(parents=True)
-                (skill / 'SKILL.md').touch()
+        for name in ('first', 'second'):
+            skill = self.root / 'skills' / name
+            skill.mkdir(parents=True)
+            (skill / 'SKILL.md').touch()
 
     def read(self, value):
         (self.root / 'catalog.json').write_text(json.dumps(value), encoding='utf-8')
@@ -40,10 +39,20 @@ class CatalogueTests(unittest.TestCase):
             with self.subTest(cards=cards), self.assertRaisesRegex(ValueError, 'does not match'):
                 self.read(cards)
 
-    def test_missing_skill_in_non_claude_pack_blocks_publication(self):
-        (self.root / 'Antigravity/skills/second/SKILL.md').unlink()
-        with self.assertRaisesRegex(ValueError, r"Antigravity: missing skills=\['second'\]"):
-            self.read({'first': self.card, 'second': self.card})
+    def test_platform_files_override_only_their_own_pack(self):
+        shared = self.root / 'skills/second/SKILL.md'
+        override = self.root / 'platforms/claude/skills/second/SKILL.md'
+        override.parent.mkdir(parents=True)
+        override.touch()
+        self.assertEqual(publish_manifest.skill_files(self.root, 'claude')['second/SKILL.md'], override.resolve())
+        self.assertEqual(publish_manifest.skill_files(self.root, 'codex')['second/SKILL.md'], shared.resolve())
+
+    def test_platform_file_without_shared_skill_blocks_publication(self):
+        stale = self.root / 'platforms/codex/skills/removed/something.md'
+        stale.parent.mkdir(parents=True)
+        stale.touch()
+        with self.assertRaisesRegex(ValueError, 'no shared skill directory'):
+            publish_manifest.skill_files(self.root, 'codex')
 
     def test_invalid_card_fields_block_publication(self):
         bad_cards = [None, [], {**self.card, 'extra': 'unsupported'}]
@@ -104,6 +113,17 @@ class JournalTests(unittest.TestCase):
         self.git('checkout', '--quiet', '--detach', first)
         last = self.commit('Replacement release', 'catalog.json')
         self.assertEqual([entry['sha'] for entry in publish_manifest.journal_changes(last, previous)], [last, first])
+
+    def test_skips_packaging_migration_and_finds_changes_at_both_new_paths(self):
+        first = self.commit('Add skill', 'Antigravity/skills/old/SKILL.md')
+        previous = {'source': {'repository': 'gajsin/Skills', 'commit': first}, 'changes': publish_manifest.journal_changes(first)}
+        self.commit('Reorganize packaging', 'skills/moved/SKILL.md', body='Skill-Journal: skip')
+        shared = self.commit('Improve shared skill', 'skills/shared/SKILL.md')
+        platform = self.commit('Improve platform skill', 'platforms/codex/skills/native/SKILL.md')
+        self.assertEqual([entry['sha'] for entry in publish_manifest.journal_changes(platform, previous)],
+                         [platform, shared, first])
+        changed = publish_manifest.skill_updates(dict.fromkeys(('old', 'moved', 'shared', 'native')))
+        self.assertEqual({name for entry in changed for name in entry['skills']}, {'old', 'shared', 'native'})
 
 
 if __name__ == '__main__':

@@ -45,28 +45,19 @@ def skill_dirs(root):
     return sorted(p for p in root.iterdir() if p.is_dir() and (p / 'SKILL.md').is_file())
 
 
-def build_bundle(repo_root, platform, output):
-    root = (repo_root / PLATFORMS[platform] / 'skills').resolve()
-    output = output.resolve()
-    if root == output or root in output.parents:
-        raise ValueError('The archive must be outside the skill source directory.')
-    skills = skill_dirs(root)
+def platform_dir(repo_root, platform):
+    return repo_root / 'platforms' / platform
+
+
+def skill_files(repo_root, platform):
+    shared = (repo_root / 'skills').resolve()
+    overlay = (platform_dir(repo_root, platform) / 'skills').resolve()
+    skills = {path.name for path in skill_dirs(shared)}
     if not skills:
         raise ValueError('No skills found.')
-    files = []
-    rows = []
-    for skill in skills:
-        if skill.name not in ORIGINS:
-            raise ValueError(f'Add provenance for the new skill before packaging: {skill.name}')
-        if not (skill / 'LICENSE').is_file():
-            raise ValueError(f'Missing LICENSE: {skill.name}')
-        manifest = (skill / 'SKILL.md').read_text(encoding='utf-8')
-        license_match = re.search(r'^license:\s*(.+)$', manifest, re.M)
-        if not license_match:
-            raise ValueError(f'Missing license declaration: {skill.name}')
-        license_name = license_match.group(1).strip().strip('\"\'')
-        rows.append(f'| [{skill.name}](skills/{skill.name}/SKILL.md) | [{license_name}](skills/{skill.name}/LICENSE) | [Source]({ORIGINS[skill.name]}) |')
-        for path in sorted(skill.rglob('*')):
+    files = {}
+    for root in (shared, overlay):
+        for path in sorted(root.rglob('*')):
             rel = path.relative_to(root)
             if any(part in SKIP_DIRS for part in rel.parts) or path.suffix in {'.pyc', '.pyo'}:
                 continue
@@ -74,12 +65,40 @@ def build_bundle(repo_root, platform, output):
                 raise ValueError(f'Resolve symlinks before packaging: {rel}')
             if not path.is_file():
                 continue
+            if len(rel.parts) < 2 or rel.parts[0] not in skills:
+                raise ValueError(f'File has no shared skill directory: {path}')
             if root not in path.resolve().parents or any(part.startswith('.env') for part in rel.parts):
                 raise ValueError(f'Unexpected source path: {rel}')
             if path.suffix.lower() in {'.exe', '.dll', '.so', '.dylib'}:
                 raise ValueError(f'Runtime binaries do not belong in this source bundle: {rel}')
-            files.append(('skills/' + rel.as_posix(), path.read_bytes()))
-    agents = root.parent / 'agents'
+            files[rel.as_posix()] = path
+    return files
+
+
+def build_bundle(repo_root, platform, output):
+    output = output.resolve()
+    for source in (repo_root / 'skills', platform_dir(repo_root, platform)):
+        root = source.resolve()
+        if root == output or root in output.parents:
+            raise ValueError('The archive must be outside the skill source directories.')
+    sources = skill_files(repo_root, platform)
+    skills = sorted(name.removesuffix('/SKILL.md') for name in sources if name.count('/') == 1
+                    and name.endswith('/SKILL.md'))
+    files = []
+    rows = []
+    for skill in skills:
+        if skill not in ORIGINS:
+            raise ValueError(f'Add provenance for the new skill before packaging: {skill}')
+        if f'{skill}/LICENSE' not in sources:
+            raise ValueError(f'Missing LICENSE: {skill}')
+        manifest = sources[f'{skill}/SKILL.md'].read_text(encoding='utf-8')
+        license_match = re.search(r'^license:\s*(.+)$', manifest, re.M)
+        if not license_match:
+            raise ValueError(f'Missing license declaration: {skill}')
+        license_name = license_match.group(1).strip().strip('\"\'')
+        rows.append(f'| [{skill}](skills/{skill}/SKILL.md) | [{license_name}](skills/{skill}/LICENSE) | [Source]({ORIGINS[skill]}) |')
+    files.extend((f'skills/{name}', path.read_bytes()) for name, path in sources.items())
+    agents = platform_dir(repo_root, platform) / 'agents'
     if agents.is_dir():
         for path in sorted(agents.glob('*.md')):
             files.append(('agents/' + path.name, path.read_bytes()))

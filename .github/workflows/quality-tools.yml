@@ -4,14 +4,18 @@ on:
   push:
     branches: [main]
     paths:
-      - '**/skills/spec-review/scripts/**'
-      - '**/skills/spec-review/patches/**'
+      - 'skills/spec-review/scripts/**'
+      - 'skills/spec-review/patches/**'
+      - 'platforms/*/skills/spec-review/scripts/**'
+      - 'platforms/*/skills/spec-review/patches/**'
       - 'tests/test_mutator_windows.py'
       - '.github/workflows/quality-tools.yml'
   pull_request:
     paths:
-      - '**/skills/spec-review/scripts/**'
-      - '**/skills/spec-review/patches/**'
+      - 'skills/spec-review/scripts/**'
+      - 'skills/spec-review/patches/**'
+      - 'platforms/*/skills/spec-review/scripts/**'
+      - 'platforms/*/skills/spec-review/patches/**'
       - 'tests/test_mutator_windows.py'
       - '.github/workflows/quality-tools.yml'
   workflow_dispatch:
@@ -39,6 +43,6 @@ jobs:
         with:
           node-version: '22'
       - name: Install pinned tools and compatibility patch
-        run: python Codex/skills/spec-review/scripts/quality_tools.py setup
+        run: python skills/spec-review/scripts/quality_tools.py setup
       - name: Run execution and isolation regressions
         run: python tests/test_mutator_windows.py -v

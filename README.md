@@ -5,11 +5,11 @@ debugging, review, interviews, UI design, animation, writing, and model
 qualification. Shared principles are adapted to each host's tools, invocation,
 and capabilities. Host-specific upstream builds may also differ.
 
-| Host | Folder | Invoke |
+| Host | Release archive | Invoke |
 |---|---|---|
-| Codex | [`Codex/`](Codex) | `$name` |
-| Claude Code | [`Claude Code/`](Claude%20Code) | `/name` |
-| Antigravity | [`Antigravity/`](Antigravity) | `/name` |
+| Codex | [gajsin-skills-codex.zip](https://github.com/gajsin/Skills/releases/download/skills/gajsin-skills-codex.zip) | `$name` |
+| Claude Code | [gajsin-skills-claude.zip](https://github.com/gajsin/Skills/releases/download/skills/gajsin-skills-claude.zip) | `/name` |
+| Antigravity | [gajsin-skills-antigravity.zip](https://github.com/gajsin/Skills/releases/download/skills/gajsin-skills-antigravity.zip) | `/name` |
 
 ## Skills
 
@@ -36,10 +36,9 @@ How the close neighbours differ and how to combine skills: [GUIDE.md](GUIDE.md).
 ## Repository layout
 
 ```text
-Codex/skills/          skills for Codex, with agents/openai.yaml invocation policies
-Claude Code/skills/    skills for Claude Code
-Claude Code/agents/    Impeccable helper agents for Claude Code
-Antigravity/skills/    skills for Antigravity
+skills/                complete skills for direct installation
+platforms/codex/       Codex-specific files and invocation policies
+platforms/claude/      Claude Code-specific files and Impeccable helper agents
 AGENTS.md              shared working principles (Russian)
 GUIDE.md               choosing and combining skills
 catalog.json           public Russian skill cards and their display order
@@ -50,27 +49,28 @@ scripts/               builder for release archives
 
 ### Install one skill from GitHub
 
-Give your agent the link to the skill directory for its host. For example, in Codex:
+Give your agent a link to a complete skill directory in [`skills/`](skills):
 
-> Install Humanizer from https://github.com/gajsin/Skills/tree/main/Codex/skills/humanizer
+> Install Humanizer from https://github.com/gajsin/Skills/tree/main/skills/humanizer
 > into my personal skills folder. Keep its license, references, and helper files.
 
-For another host, choose the corresponding directory under `Claude Code/skills/`
-or `Antigravity/skills/`. Install the complete skill directory, not just SKILL.md.
-Release archives are optional; a GitHub directory link is enough to locate a skill.
+The shared directories contain the Antigravity edition and are ready to copy.
+Use the Codex or Claude Code archive for that host's manual-only invocation
+settings and native Impeccable roles, including when installing just one skill.
+The pack builder applies the files in `platforms/` to `skills/`.
 
 ### Copy skill directories manually
 
-Create the destination directory, then copy the desired skills for your host.
+Unpack the archive for your host, then copy the desired skills to the destination below.
 Keep each directory intact: it carries its license, references, and helper scripts.
 Copying updates matching files; it does not remove obsolete files from an existing
 installation. Restart the agent if the changes do not appear.
 
-| Host | Copy | Into |
-|---|---|---|
-| Codex | `Codex/skills/<skill-name>/` | `~/.agents/skills/` |
-| Claude Code | `Claude Code/skills/<skill-name>/` | `~/.claude/skills/` |
-| Antigravity App/IDE and CLI | `Antigravity/skills/<skill-name>/` | `~/.gemini/config/skills/` |
+| Host | Copy `skills/<skill-name>/` into |
+|---|---|
+| Codex | `~/.agents/skills/` |
+| Claude Code | `~/.claude/skills/` |
+| Antigravity App/IDE and CLI | `~/.gemini/config/skills/` |
 
 Antigravity CLI also reads `~/.gemini/antigravity-cli/skills/` and
 `~/.gemini/skills/`. Copies there take priority over the shared directory.
@@ -83,8 +83,8 @@ and the [CLI changelog](https://antigravity.google/docs/changelog?tab=hub#v1.5.1
 
 | Host | Copy | Into |
 |---|---|---|
-| Codex | `Codex/skills/impeccable/agents/*.toml` | `~/.codex/agents/` or the project's `.codex/agents/` |
-| Claude Code | `Claude Code/agents/*.md` | `~/.claude/agents/` or the project's `.claude/agents/` |
+| Codex | `skills/impeccable/agents/*.toml` from the Codex archive | `~/.codex/agents/` or the project's `.codex/agents/` |
+| Claude Code | `agents/*.md` from the Claude Code archive | `~/.claude/agents/` or the project's `.claude/agents/` |
 
 Use one registration per role. The Codex role names use hyphens. Keep
 `agents/openai.yaml` inside the skill folder. Antigravity Impeccable can delegate
@@ -98,18 +98,18 @@ home folder. Cloud sessions can load skills from the checked-out project.
 `gsap/` directory, verify it is available, then remove those two old directories
 from your personal skills location. Copying a new pack alone does not remove them.
 
-### Install the Claude Code pack from a checkout
+### Install the Claude Code pack from an extracted archive
 
 ```bash
 mkdir -p ~/.claude/skills ~/.claude/agents
-cp -r "Claude Code/skills/"* ~/.claude/skills/
-cp "Claude Code/agents/"* ~/.claude/agents/
+cp -r skills/* ~/.claude/skills/
+cp agents/*.md ~/.claude/agents/
 ```
 
 ```powershell
 New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\.claude\skills", "$env:USERPROFILE\.claude\agents" | Out-Null
-Copy-Item -Recurse -Force "Claude Code\skills\*" "$env:USERPROFILE\.claude\skills"
-Copy-Item -Force "Claude Code\agents\*" "$env:USERPROFILE\.claude\agents"
+Copy-Item -Recurse -Force "skills\*" "$env:USERPROFILE\.claude\skills"
+Copy-Item -Force "agents\*.md" "$env:USERPROFILE\.claude\agents"
 ```
 
 ### Optional personal rules
@@ -147,8 +147,9 @@ The English `description` and `license` come from the Claude Code edition's
 
 When changing a skill, check its card against the actual instructions and update
 the relevant fields in the same commit. For a new skill, add a complete card in
-the desired position, the host editions, license, and provenance. When removing
-or renaming a skill, remove or rename its card as well. Keep statements factual:
+the desired position, the shared skill and any host-specific files, license, and
+provenance. When removing or renaming a skill, remove or rename its card as well.
+Keep statements factual:
 do not invent capabilities, guarantees, or permissions. Match shared cards to the
 behavior of the host editions; mention material differences when they exist.
 
@@ -207,5 +208,5 @@ redistribute a skill. `scripts/` is MIT. Linked reference images and articles ke
 their own rights.
 
 Visual Explainer bundles Martian Mono separately under OFL-1.1; keep its
-[font notice](Codex/skills/visual-explainer/NOTICE.md) and `assets/fonts/OFL.txt`.
+[font notice](skills/visual-explainer/NOTICE.md) and `assets/fonts/OFL.txt`.
 Its instructions remain MIT. St Marie Thin is not distributed in the pack.

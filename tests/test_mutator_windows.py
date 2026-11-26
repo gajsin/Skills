@@ -17,7 +17,7 @@ import venv
 from unittest import mock
 
 REPO = Path(__file__).resolve().parents[1]
-HELPER = REPO / "Codex/skills/spec-review/scripts/quality_tools.py"
+HELPER = REPO / "skills/spec-review/scripts/quality_tools.py"
 spec = importlib.util.spec_from_file_location("quality_tools", HELPER)
 helper = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(helper)
@@ -31,12 +31,11 @@ def hashes(root):
 
 class SharedQualityToolTests(unittest.TestCase):
     def test_host_editions_share_quality_tool_sources(self):
-        codex = HELPER.parent.parent
-        for platform in ('Antigravity', 'Claude Code'):
-            edition = REPO / platform / 'skills/spec-review'
-            for directory in ('scripts', 'patches'):
-                with self.subTest(platform=platform, directory=directory):
-                    self.assertEqual(hashes(edition / directory), hashes(codex / directory))
+        for edition in (REPO / "platforms").iterdir():
+            for directory in ("scripts", "patches"):
+                with self.subTest(platform=edition.name, directory=directory):
+                    overlay = edition / "skills/spec-review" / directory
+                    self.assertFalse(hashes(overlay), f"Keep {directory} shared across all packs")
 
 
 class MutationTests(unittest.TestCase):
@@ -316,6 +315,6 @@ if __name__ == "__main__":
     python = helper.tool_python(helper.runtime_dir())
     if Path(sys.prefix).resolve() != python.parent.parent.resolve():
         if not helper.ready(helper.runtime_dir()):
-            raise SystemExit("Run Codex/skills/spec-review/scripts/quality_tools.py setup first")
+            raise SystemExit("Run skills/spec-review/scripts/quality_tools.py setup first")
         raise SystemExit(subprocess.run([str(python), "-I", "-B", "-X", "utf8", str(Path(__file__).resolve()), *sys.argv[1:]]).returncode)
     unittest.main()

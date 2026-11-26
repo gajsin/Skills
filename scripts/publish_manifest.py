@@ -6,6 +6,7 @@ from datetime import datetime, timezone
 import argparse
 import json
 import re
+from shutil import copyfile
 import subprocess
 
 from package_skills import BUNDLE_NAME, LOCATIONS, ORIGINS, PLATFORMS, build_bundle, skill_dirs
@@ -109,11 +110,16 @@ def build_manifest(output, download_base, previous=None):
         text = (REPO / 'skills' / name / 'SKILL.md').read_text(encoding='utf-8')
         skills.append({'name': name, 'description': field(text, 'description', name),
                        'license': field(text, 'license', name), 'origin': ORIGINS[name], **card})
-    result = build_bundle(REPO, output / BUNDLE_NAME)
-    packs = [{'platform': platform, 'title': title, 'url': f'{download_base}/{BUNDLE_NAME}',
-              'bytes': result['bytes'], 'sha256': result['sha256'],
-              'location': LOCATIONS[platform], 'invoke': '$' if platform == 'codex' else '/'}
-             for platform, title in PLATFORMS.items()]
+    archive = output / BUNDLE_NAME
+    result = build_bundle(REPO, archive)
+    packs = []
+    for platform, title in PLATFORMS.items():
+        # The portfolio validates these existing URLs for each install profile.
+        name = f'gajsin-skills-{platform}.zip'
+        copyfile(archive, output / name)
+        packs.append({'platform': platform, 'title': title, 'url': f'{download_base}/{name}',
+                      'bytes': result['bytes'], 'sha256': result['sha256'],
+                      'location': LOCATIONS[platform], 'invoke': '$' if platform == 'codex' else '/'})
     manifest = {'source': {'repository': 'gajsin/Skills', 'commit': commit, 'date': date},
                 'packs': packs, 'skills': skills, 'updates': skill_updates(catalog),
                 'changes': journal_changes(commit, previous)}

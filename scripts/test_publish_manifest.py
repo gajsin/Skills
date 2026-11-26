@@ -112,7 +112,7 @@ class JournalTests(unittest.TestCase):
         changed = publish_manifest.skill_updates(dict.fromkeys(('old', 'moved', 'shared', 'native')))
         self.assertEqual({name for entry in changed for name in entry['skills']}, {'old', 'shared', 'native'})
 
-    def test_release_profiles_share_one_complete_archive(self):
+    def test_release_serves_the_same_archive_at_existing_download_urls(self):
         card = {'group': 'Writing', 'use': 'Edit', 'result': 'Draft', 'edits': 'Requested text'}
         skill = self.root / 'skills/humanizer'
         skill.mkdir(parents=True)
@@ -130,11 +130,17 @@ class JournalTests(unittest.TestCase):
         base = 'https://example.test/release'
         manifest = publish_manifest.build_manifest(output, base)
         archive = output / 'gajsin-skills.zip'
-        self.assertEqual(set(output.iterdir()), {archive, output / 'skills.json'})
+        self.assertEqual(set(output.iterdir()), {archive, output / 'skills.json',
+                                               *(output / f'gajsin-skills-{host}.zip'
+                                                 for host in ('codex', 'claude', 'antigravity'))})
         self.assertEqual(manifest['skills'][0]['description'], 'Edit prose.')
         self.assertEqual({p['platform'] for p in manifest['packs']}, {'codex', 'claude', 'antigravity'})
-        self.assertEqual({p['url'] for p in manifest['packs']}, {f'{base}/{archive.name}'})
-        self.assertEqual({p['sha256'] for p in manifest['packs']}, {hashlib.sha256(archive.read_bytes()).hexdigest()})
+        data = archive.read_bytes()
+        for pack in manifest['packs']:
+            name = f'gajsin-skills-{pack["platform"]}.zip'
+            self.assertEqual(pack['url'], f'{base}/{name}')
+            self.assertEqual((output / name).read_bytes(), data)
+            self.assertEqual(pack['sha256'], hashlib.sha256(data).hexdigest())
         with ZipFile(archive) as packed:
             self.assertEqual(packed.read('skills/humanizer/SKILL.md'), text)
 

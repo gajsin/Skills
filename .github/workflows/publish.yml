@@ -47,13 +47,13 @@ jobs:
 
       - name: Publish the release
         run: |
-          notes="One shared skill archive for Codex, Claude Code and Antigravity, built from ${SKILLS_COMMIT}."
+          notes="One shared skill archive for Codex, Claude Code and Antigravity, built from ${SKILLS_COMMIT}. The platform-named downloads contain the same archive for compatibility with existing links."
           if gh release view skills > /dev/null 2>&1; then
-            gh release upload skills "$RUNNER_TEMP/dist/gajsin-skills.zip" --clobber
+            gh release upload skills "$RUNNER_TEMP/dist"/*.zip --clobber
             gh release upload skills "$RUNNER_TEMP/dist"/skills.json --clobber
             gh release edit skills --notes "$notes"
           else
-            gh release create skills "$RUNNER_TEMP/dist/gajsin-skills.zip" "$RUNNER_TEMP/dist/skills.json" --title "Skills" --notes "$notes" --latest
+            gh release create skills "$RUNNER_TEMP/dist"/*.zip "$RUNNER_TEMP/dist/skills.json" --title "Skills" --notes "$notes" --latest
           fi
 
       - name: Refresh the portfolio cache

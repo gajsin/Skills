@@ -1,6 +1,6 @@
 # Rebuild the release archives after every push to main.
 # One release, tag "skills", always holds the archives and skills.json of the latest main;
-# gajsin.tech reads skills.json from it. No secrets: the job uses its own GITHUB_TOKEN.
+# gajsin.tech reads the catalogue and journal from skills.json.
 name: Publish archives
 
 on:
@@ -23,6 +23,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: main
           fetch-depth: 0
 
       - uses: actions/setup-python@v5
@@ -30,20 +31,44 @@ jobs:
           python-version: '3.12'
 
       - name: Build archives and skills.json
-        run: python scripts/publish_manifest.py --output "$RUNNER_TEMP/dist" --download-base "https://github.com/${GITHUB_REPOSITORY}/releases/download/skills"
+        run: |
+          previous=()
+          if gh release view skills --json assets --jq '.assets[].name' | grep -Fxq skills.json; then
+            gh release download skills --pattern skills.json --dir "$RUNNER_TEMP/previous"
+            previous=(--previous-manifest "$RUNNER_TEMP/previous/skills.json")
+          fi
+          python scripts/publish_manifest.py --output "$RUNNER_TEMP/dist" --download-base "https://github.com/${GITHUB_REPOSITORY}/releases/download/skills" "${previous[@]}"
+          echo "SKILLS_COMMIT=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
 
       - name: Move the skills tag to this commit
         run: |
-          git tag --force skills "$GITHUB_SHA"
+          git tag --force skills "$SKILLS_COMMIT"
           git push --force origin refs/tags/skills
 
       - name: Publish the release
         run: |
-          notes="Archives for Codex, Claude Code and Antigravity, built from ${GITHUB_SHA}. Rebuilt on every push to main."
+          notes="Archives for Codex, Claude Code and Antigravity, built from ${SKILLS_COMMIT}. Rebuilt on every push to main."
           if gh release view skills > /dev/null 2>&1; then
             gh release upload skills "$RUNNER_TEMP/dist"/*.zip --clobber
             gh release upload skills "$RUNNER_TEMP/dist"/skills.json --clobber
             gh release edit skills --notes "$notes"
           else
             gh release create skills "$RUNNER_TEMP/dist"/*.zip "$RUNNER_TEMP/dist"/skills.json --title "Skills" --notes "$notes" --latest
+          fi
+
+      - name: Refresh the portfolio cache
+        env:
+          SKILLS_REVALIDATE_SECRET: ${{ secrets.SKILLS_REVALIDATE_SECRET }}
+        run: |
+          if [[ -z "$SKILLS_REVALIDATE_SECRET" ]]; then
+            echo "::notice::Portfolio cache refresh is not configured."
+            exit 0
+          fi
+          status=$(curl --fail --silent --show-error --retry 3 --max-time 20 --request POST \
+            --output /dev/null --write-out '%{http_code}' \
+            --header "Authorization: Bearer $SKILLS_REVALIDATE_SECRET" \
+            https://gajsin.tech/api/skills/revalidate)
+          if [[ "$status" != 204 ]]; then
+            echo "::error::Unexpected portfolio cache refresh status: $status"
+            exit 1
           fi

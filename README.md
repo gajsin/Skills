@@ -145,9 +145,14 @@ before creating archives. Do not commit
 `dist/`. Use a clear commit title and body describing the actual user-facing
 change: the website's journal displays that text.
 
-Pushing to `main` runs `.github/workflows/publish.yml`, which publishes the packs
-and complete cards in the `skills` release. Wait for the successful workflow
-and verify the released manifest and archives.
+Pushing to `main` runs `.github/workflows/publish.yml`. It publishes the packs,
+cards and up to 20 journal entries in the `skills` release. The first release
+with a journal reads Git history. Later releases keep existing entries and add
+the relevant commits since the previous release, including catalogue changes.
+After publication, the workflow refreshes the portfolio cache using the
+`SKILLS_REVALIDATE_SECRET` repository secret. Set the same server-only secret
+on the portfolio after deploying its refresh endpoint. Wait for the successful
+workflow and verify the released manifest and archives.
 
 Build a source-only archive per host with Python 3 (standard library only):
 

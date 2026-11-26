@@ -2,6 +2,7 @@
 # Copyright (c) 2026 gajsin
 """Build the three host archives and skills.json, the manifest that gajsin.tech reads from the release."""
 from pathlib import Path
+from datetime import datetime, timezone
 import argparse
 import json
 import re
@@ -11,6 +12,8 @@ from package_skills import LOCATIONS, ORIGINS, PLATFORMS, build_bundle, skill_di
 
 REPO = Path(__file__).resolve().parents[1]
 CARD_FIELDS = {'group', 'use', 'result', 'edits'}
+JOURNAL_PATHS = (*(f'{edition}/skills' for edition in PLATFORMS.values()), 'catalog.json')
+JOURNAL_SIZE = 20
 
 
 def load_catalog():
@@ -47,7 +50,38 @@ def field(text, key, name):
     return match.group(1).strip().strip('"\'')
 
 
-def build_manifest(output, download_base):
+def journal_changes(commit, previous=None):
+    """Keep published entries and add relevant commits since the last published SHA."""
+    old_changes = []
+    revision = commit
+    if previous is not None and 'changes' in previous:
+        source = previous['source']
+        old_commit = source['commit']
+        if source['repository'] != 'gajsin/Skills' or not re.fullmatch(r'[0-9a-f]{40}', old_commit):
+            raise ValueError('Previous skills.json has an invalid source')
+        try:
+            ancestor = git('merge-base', old_commit, commit) == old_commit
+        except subprocess.CalledProcessError as error:
+            if error.returncode not in (1, 128):
+                raise
+            ancestor = False
+        if ancestor:
+            revision = f'{old_commit}..{commit}'
+            old_changes = previous['changes']
+
+    log = git('log', '-z', f'-{JOURNAL_SIZE}', '--format=%H%x00%cI%x00%B', revision, '--', *JOURNAL_PATHS)
+    fields = log.removesuffix('\x00').split('\x00') if log else []
+    changes = []
+    for sha, date, message in zip(fields[::3], fields[1::3], fields[2::3], strict=True):
+        title, _, body = message.strip().partition('\n')
+        body = re.sub(r'(?:^|\n\n)(?:Co-Authored-By:[^\n]+(?:\n|$))+$', '', body.strip(), flags=re.I)
+        utc_date = datetime.fromisoformat(date).astimezone(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
+        changes.append({'sha': sha, 'date': utc_date, 'title': title or sha[:7], 'body': body})
+    unique = {change['sha']: change for change in [*changes, *old_changes]}
+    return sorted(unique.values(), key=lambda change: change['date'], reverse=True)[:JOURNAL_SIZE]
+
+
+def build_manifest(output, download_base, previous=None):
     commit, date = git('log', '-1', '--format=%H %cs').split(' ')
     folder = REPO / PLATFORMS['claude'] / 'skills'
     catalog = load_catalog()
@@ -77,7 +111,8 @@ def build_manifest(output, download_base):
         else:
             updates.append({'date': day, 'skills': changed})
     manifest = {'source': {'repository': 'gajsin/Skills', 'commit': commit, 'date': date},
-                'packs': packs, 'skills': skills, 'updates': updates[:12]}
+                'packs': packs, 'skills': skills, 'updates': updates[:12],
+                'changes': journal_changes(commit, previous)}
     (output / 'skills.json').write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
     return manifest
 
@@ -86,6 +121,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--download-base', required=True, help='URL prefix of the release assets')
+    parser.add_argument('--previous-manifest', type=Path, help='skills.json from the currently published release')
     args = parser.parse_args()
-    manifest = build_manifest(args.output.resolve(), args.download_base.rstrip('/'))
+    previous = json.loads(args.previous_manifest.read_text(encoding='utf-8')) if args.previous_manifest else None
+    manifest = build_manifest(args.output.resolve(), args.download_base.rstrip('/'), previous)
     print(json.dumps({'commit': manifest['source']['commit'][:7], 'skills': len(manifest['skills'])}))

@@ -60,5 +60,51 @@ class CatalogueTests(unittest.TestCase):
                 self.read(value)
 
 
+class JournalTests(unittest.TestCase):
+    def setUp(self):
+        directory = TemporaryDirectory()
+        self.addCleanup(directory.cleanup)
+        self.root = Path(directory.name)
+        repo = patch.object(publish_manifest, 'REPO', self.root)
+        repo.start()
+        self.addCleanup(repo.stop)
+        self.git = publish_manifest.git
+        self.git('init', '--quiet')
+        self.git('config', 'user.name', 'Journal test')
+        self.git('config', 'user.email', 'journal@example.test')
+
+    def commit(self, title, *paths, body=''):
+        for path in paths:
+            target = self.root / path
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_text(title, encoding='utf-8')
+        self.git('add', '--', *paths)
+        self.git('commit', '--quiet', '--no-gpg-sign', '-m', title, '-m', body)
+        return self.git('rev-parse', 'HEAD')
+
+    def test_adds_only_new_skill_commits_and_keeps_published_entries(self):
+        first = self.commit('Initial skill', 'Codex/skills/demo/SKILL.md')
+        previous = {'source': {'repository': 'gajsin/Skills', 'commit': first}, 'changes': publish_manifest.journal_changes(first)}
+        previous['changes'][0]['body'] = 'Already published'
+        second = self.commit('Synchronize editions', 'Codex/skills/demo/SKILL.md', 'Claude Code/skills/demo/SKILL.md',
+                             body='Updated examples.\n\nCo-Authored-By: Contributor <journal@example.test>')
+        self.commit('Maintenance', 'README.md')
+        third = self.commit('Update catalogue', 'catalog.json')
+        journal = publish_manifest.journal_changes(third, previous)
+        self.assertEqual([entry['sha'] for entry in journal], [third, second, first])
+        self.assertEqual(journal[1]['body'], 'Updated examples.')
+        self.assertEqual(journal[2]['body'], 'Already published')
+        published = {'source': {'repository': 'gajsin/Skills', 'commit': third}, 'changes': journal}
+        self.assertEqual(publish_manifest.journal_changes(third, published), journal)
+
+    def test_first_release_and_rewritten_history_use_the_current_ancestry(self):
+        first = self.commit('Add skill', 'Antigravity/skills/demo/SKILL.md')
+        replaced = self.commit('Old release', 'catalog.json')
+        previous = {'source': {'repository': 'gajsin/Skills', 'commit': replaced}, 'changes': publish_manifest.journal_changes(replaced)}
+        self.git('checkout', '--quiet', '--detach', first)
+        last = self.commit('Replacement release', 'catalog.json')
+        self.assertEqual([entry['sha'] for entry in publish_manifest.journal_changes(last, previous)], [last, first])
+
+
 if __name__ == '__main__':
     unittest.main()

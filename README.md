@@ -42,8 +42,6 @@ Claude Code/agents/    Impeccable helper agents for Claude Code
 Antigravity/skills/    skills for Antigravity
 Codex/AGENTS.md, Antigravity/GEMINI.md, Claude Code/CLAUDE.md
                        the author's own always-on rules (Russian), optional
-Claude Code/PROJECT-RULES.md
-                       the author's stack preferences for per-project rules
 GUIDE.md               choosing and combining skills
 catalog.json           public Russian skill cards and their display order
 scripts/               builder for release archives

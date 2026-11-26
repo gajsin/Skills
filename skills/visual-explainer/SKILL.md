@@ -1,6 +1,6 @@
 ---
 name: visual-explainer
-description: "Create editable SVG illustrations, diagrams, and data charts in a monochrome design system. Animate when requested. Invoke explicitly with /visual-explainer; do not run automatically."
+description: "Create editable SVG illustrations, diagrams, and data charts in a monochrome design system. Animate when requested. Invoke explicitly."
 license: MIT
 ---
 

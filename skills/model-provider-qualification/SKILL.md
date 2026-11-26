@@ -1,7 +1,7 @@
 ---
 name: model-provider-qualification
 license: MIT
-description: Qualify an AI model and provider route with evidence when invoked with /model-provider-qualification.
+description: Qualify an AI model and provider route with evidence when explicitly requested.
 ---
 
 # Model/provider qualification

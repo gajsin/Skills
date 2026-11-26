@@ -130,7 +130,7 @@ Before: "Great question! Of course, here is the description. The service handles
 imports. I hope that helps!"
 After: "The service handles imports."
 
-Keep a real limitation: "The interface was not checked in Antigravity."
+Keep a real limitation: "The interface was not checked in the browser."
 Keep actual change history: "Version 2 fixed duplicate event delivery."
 
 ## Reader context

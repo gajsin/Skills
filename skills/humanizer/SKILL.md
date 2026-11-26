@@ -1,6 +1,6 @@
 ---
 name: humanizer
-description: Write or edit natural prose and grounded summaries from the available context. Invoke with /humanizer.
+description: Write or edit natural prose and grounded summaries from the available context. Invoke explicitly.
 license: MIT
 metadata:
   version: "3.1.0"

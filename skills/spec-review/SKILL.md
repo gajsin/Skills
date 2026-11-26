@@ -1,7 +1,7 @@
 ---
 name: spec-review
 license: MIT
-description: Review changes or audit a project against standards and requirements with scoped automated evidence. Invoke with /spec-review.
+description: Review changes or audit a project against standards and requirements with scoped automated evidence. Invoke explicitly.
 ---
 
 Two-axis review of requested changes or an audit of an existing project:
@@ -53,7 +53,7 @@ Look for the originating spec, in this order:
 
 ### 3. Identify the standards sources
 
-Applicable global and project instructions (AGENTS.md and GEMINI.md), plus repo documents such as `CODING_STANDARDS.md` or `CONTRIBUTING.md`. Respect the host's instruction precedence and the user's explicit requirements.
+Applicable global and project instructions, plus repo documents such as `CODING_STANDARDS.md` or `CONTRIBUTING.md`. Respect the host's instruction precedence and the user's explicit requirements.
 
 On top of whatever the repo documents, the Standards axis always carries the **smell baseline** below: a fixed set of Fowler code smells (_Refactoring_, ch.3) that applies even when a repo documents nothing. Two rules bind it:
 

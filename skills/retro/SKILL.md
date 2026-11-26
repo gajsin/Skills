@@ -1,6 +1,6 @@
 ---
 name: retro
-description: "Review an agent session and propose minimal evidence-backed improvements when explicitly invoked with /retro."
+description: "Review an agent session and propose minimal evidence-backed improvements when explicitly requested."
 license: MIT
 ---
 
@@ -32,7 +32,7 @@ for requirements and quality; independent review supplements that responsibility
 Write a concrete action with a clear stopping condition. Keep each rule in one
 appropriate place and load conditional detail only when relevant:
 
-- A lasting rule across projects belongs in the user's global AGENTS.md or GEMINI.md.
+- A lasting rule across projects belongs in the user's global agent instructions.
 - A project-specific requirement belongs in that project's instruction file.
 - An occasional procedure belongs in an explicitly invoked skill.
 - A mechanical condition belongs in an existing linter, test, or CI check.

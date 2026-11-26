@@ -33,7 +33,7 @@ For a standalone critique, resolve one stable target, run the two assessments, a
 
 For a combined workflow, use independent assessment when it is available and already authorized. Otherwise perform the design review first and the detector/browser evidence pass separately, then synthesize; note that both were done in the same context. Do not stop the combined workflow solely to request delegation or repeat an applicable assessment. Use the standalone delegation gates below for standalone critique.
 
-**Native platforms** (`ios` / `android` / `adaptive`): Assessment B does not apply, because `impeccable detect` and the browser overlay read only web markup. Run Assessment A alone in this context and skip both sub-agent gates below, the Codex permission question included: with no B there is nothing to isolate A from, so this is the complete native method and carries no degraded banner. Do not run `impeccable detect` on native source; its empty result reads as clean.
+**Native platforms** (`ios` / `android` / `adaptive`): Assessment B does not apply, because `impeccable detect` and the browser overlay read only web markup. Run Assessment A alone in this context and skip both sub-agent gates below, including the delegation permission check: with no B there is nothing to isolate A from, so this is the complete native method and carries no degraded banner. Do not run `impeccable detect` on native source; its empty result reads as clean.
 
 When delegating, use distinct sub-agents for Assessments A and B, and keep their outputs separate until synthesis.
 
@@ -158,7 +158,7 @@ For each issue, tag with **P0-P3 severity** (see [Issue Severity below](#issue-s
 - **[P?] What**: Name the problem clearly
 - **Why it matters**: How this hurts users or undermines goals
 - **Fix**: What to do about it (be concrete)
-- **Suggested command**: Which command could address this (from: /impeccable adapt, /impeccable animate, /impeccable audit, /impeccable bolder, /impeccable clarify, /impeccable colorize, /impeccable critique, /impeccable delight, /impeccable distill, /impeccable document, /impeccable harden, /impeccable layout, /impeccable onboard, /impeccable optimize, /impeccable overdrive, /impeccable polish, /impeccable quieter, /impeccable shape, /impeccable typeset)
+- **Suggested command**: Which command could address this (from: impeccable adapt, impeccable animate, impeccable audit, impeccable bolder, impeccable clarify, impeccable colorize, impeccable critique, impeccable delight, impeccable distill, impeccable document, impeccable harden, impeccable layout, impeccable onboard, impeccable optimize, impeccable overdrive, impeccable polish, impeccable quieter, impeccable shape, impeccable typeset)
 
 #### Persona Red Flags
 > *Consult the [Personas reference](#persona-based-design-testing) below.*
@@ -200,7 +200,7 @@ Persistence is not the end of the run. After it, the response continues with the
 
 ### Persist the Snapshot
 
-Once the report above is finalized, write it to `.impeccable/critique/` so the user can refer back, and so `/impeccable polish` can pick up the priority issues without a copy-paste.
+Once the report above is finalized, write it to `.impeccable/critique/` so the user can refer back, and so `impeccable polish` can pick up the priority issues without a copy-paste.
 
 In a combined workflow, skip snapshot storage and continue to the handoff at Ask the User. In standalone critique, skip storage if file writes are prohibited or the Setup slug was null (vague or root-level target), then continue to the closing questions.
 
@@ -270,25 +270,25 @@ Ask questions along these lines (adapt to the specific findings; do not ask gene
 
 List recommended commands in priority order, based on the user's answers:
 
-1. **`/command-name`**: Brief description of what to fix (specific context from critique findings)
-2. **`/command-name`**: Brief description (specific context)
+1. **`command-name`**: Brief description of what to fix (specific context from critique findings)
+2. **`command-name`**: Brief description (specific context)
 ...
 
 **Rules for recommendations**:
-- Only recommend commands from: /impeccable adapt, /impeccable animate, /impeccable audit, /impeccable bolder, /impeccable clarify, /impeccable colorize, /impeccable critique, /impeccable delight, /impeccable distill, /impeccable document, /impeccable harden, /impeccable layout, /impeccable onboard, /impeccable optimize, /impeccable overdrive, /impeccable polish, /impeccable quieter, /impeccable shape, /impeccable typeset
+- Only recommend commands from: impeccable adapt, impeccable animate, impeccable audit, impeccable bolder, impeccable clarify, impeccable colorize, impeccable critique, impeccable delight, impeccable distill, impeccable document, impeccable harden, impeccable layout, impeccable onboard, impeccable optimize, impeccable overdrive, impeccable polish, impeccable quieter, impeccable shape, impeccable typeset
 - Order by the user's stated priorities first, then by impact
 - Each item's description should carry enough context that the command knows what to focus on
 - Map each Priority Issue to the appropriate command
 - Skip commands that would address zero issues
 - If the user chose a limited scope, only include items within that scope
 - If the user marked areas as off-limits, exclude commands that would touch those areas
-- End with `/impeccable polish` as the final step if any fixes were recommended
+- End with `impeccable polish` as the final step if any fixes were recommended
 
 After presenting the summary, tell the user:
 
 > You can ask me to run these one at a time, all at once, or in any order you prefer.
 >
-> Re-run `/impeccable critique` after fixes to see your score improve.
+> Re-run `impeccable critique` after fixes to see your score improve.
 
 ---
 

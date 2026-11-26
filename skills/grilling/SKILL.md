@@ -1,7 +1,7 @@
 ---
 name: grilling
 license: MIT
-description: Interview deeply about project requirements and design when invoked with /grilling.
+description: Interview deeply about project requirements and design when explicitly requested.
 ---
 
 # Grilling
@@ -64,7 +64,7 @@ ask for the real information or a sample; recommend how to provide or check it,
 never an invented factual answer. Avoid a predetermined architecture. Each answer
 should narrow or expand the next questions.
 
-In Antigravity, use `ask_question` with selectable answers when available; respect its per-call limits. Keep native question buttons. Use the chat fallback if the tool is unavailable.
+Use the available structured question tool with selectable answers and respect its limits. If it is unavailable, ask in chat.
 
 Without a native question tool, use plain chat and explain each question's purpose.
 Include a recommendation and alternatives for choices; request real information for

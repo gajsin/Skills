@@ -5,7 +5,7 @@ Choose a method that makes the current decision visible with little setup.
 ## Medium and access
 
 - **Searched references:** find and actually view relevant public work with available search/browser tools. Pinterest is optional. For inaccessible or sign-in-only material, use another public source or user attachments; do not bypass access controls.
-- **Generated boards or studies:** use image generation only when available in this session and follow its input/output rules. In Codex prefer the built-in image tool; on other hosts discover the actual capability. Without generation, use viewed references and SVG studies. Do not create an SDK runner, request API keys, or change paid providers as setup.
+- **Generated boards or studies:** use image generation only when available in this session and follow its input/output rules. Without generation, use viewed references and SVG studies. Do not create an SDK runner, request API keys, or change paid providers as setup.
 - **Direct SVG:** useful for controlled shape, lettering, or proportion studies. Use editable paths/text; an embedded generated bitmap is not a vector logo.
 - **Reference collage:** compose permitted, accessible source images when useful, under the host's editing rules. Do not install an image-processing pipeline before an interview.
 

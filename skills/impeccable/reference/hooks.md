@@ -1,10 +1,10 @@
-# /impeccable hooks
+# impeccable hooks
 
-This edition uses the manual Impeccable detector in Antigravity. Run the resolved launcher with `detect [target]` when `context` reports `MANUAL_DETECTOR_REQUIRED`. `hooks status` reports configuration. An `enabled` value alone does not mean a hook is installed or will run in Antigravity.
+Run the resolved launcher with `detect [target]` when `context` reports `MANUAL_DETECTOR_REQUIRED` or the workflow calls for a scan and no working detector hook is active. `hooks status` reports configuration. An `enabled` value alone does not prove a hook is installed or firing.
 
-The hook runs the impeccable design detector on direct file edits to design-relevant files (`.tsx`, `.jsx`, `.html`, `.vue`, `.svelte`, `.astro`, `.css`, `.scss`, `.sass`, `.less`, `.ts`, `.js`). Claude Code, Codex, Cursor, and GitHub Copilot use a post-tool-use hook and push a short system reminder into the agent's context after the edit; findings get a correction prompt, pending issues get a re-nudge, and clean UI-ish files get a short ack unless quiet mode is on (`hook.quiet` in config). Plain `.ts` and `.js` files are still scanned, but stay quiet unless the detector finds something. Grok Build fires the same PostToolUse scan to mark touched files, then surfaces findings on Stop `additionalContext`. Do not expect a Grok per-edit reminder: Grok discards that stdout.
+Where an automatic detector hook is configured, it scans direct edits to design-relevant files (`.tsx`, `.jsx`, `.html`, `.vue`, `.svelte`, `.astro`, `.css`, `.scss`, `.sass`, `.less`, `.ts`, `.js`). Reminders can arrive after an edit or at session completion, depending on the hook integration. Plain `.ts` and `.js` stay quiet unless the detector finds something. `hook.quiet` silences clean and pending acknowledgements.
 
-The detector rules run in two tiers. The per-edit hook surfaces only the immediate tier: mechanical, unambiguous problems worth interrupting an edit for, such as broken images, overflowing content, contrast and legibility failures, gradient text, glow shadows, and design-system drift. Everything else (copy cadence, palette and typography taste, layout rhythm) is deferred to a deep pass on the `Stop` hook event, which runs the full rule set over every UI file touched in the session and surfaces the remaining findings once, deduplicated against what the per-edit pass already reported. A session with nothing left to report stops silently. Set `hook.perEditRules` to `"all"` in `.impeccable/config.json` to restore the full rule set on every edit. The Stop deep pass is wired for Claude Code, Codex, and Grok Build, which dispatch a native `Stop` hook event. Cursor does not get one (its `stop` hook can only answer with a follow-up user message), and GitHub Copilot's stop-style events do not feed context back to the model, so they keep the full detector per edit. Grok also fires an observe-only Stop with `reason: "shutdown"` after `end_turn`; skip that one, scan only `end_turn`.
+With a completion hook that returns findings, the per-edit pass can focus on mechanical problems such as broken images, overflow, contrast, and design-system drift. The completion pass runs the full set on touched UI files and deduplicates earlier findings. Set `hook.perEditRules` to `"all"` in `.impeccable/config.json` to run the full set on every edit.
 
 Every hook is a mechanical pass. The reflexes no scanner catches live in [craft-floor.md](craft-floor.md), which the skill loads before it edits UI, so they apply whether or not a hook is wired. A session with no automatic hook gets one `MANUAL_DETECTOR_REQUIRED` directive from `impeccable context` asking for a single detector run at the end.
 
@@ -14,12 +14,6 @@ Declare server-side template extensions under **`detector.extensions`** when the
 
 Manual `"<skill-base-dir>/scripts/impeccable" detect` scans use the same project filter config by default: `detector.ignoreRules`, `detector.ignoreFiles`, `detector.ignoreValues`, and `detector.designSystem.enabled`. `hook.enabled` only controls automatic hook execution, not manual CLI scans. Use `"<skill-base-dir>/scripts/impeccable" detect --no-config ...` for a raw detector run that ignores project config/context. Use `"<skill-base-dir>/scripts/impeccable" ignores ...` for direct CLI CRUD on the same detector ignores.
 
-Supported harnesses: Claude Code (`.claude/settings.local.json` for a project-scope install; `~/.claude/settings.json` for a user-scope install; a project hook moved into shared `.claude/settings.json` is honored in place too), Codex (`.codex/hooks.json` in the project), Cursor (`.cursor/hooks.json` in the project), Grok Build (`.grok/hooks/impeccable.json` in the project; requires `/hooks-trust` or `--trust`), and GitHub Copilot (`.github/hooks/impeccable.json` in the project, a team-shared committed file that both the Copilot CLI and the cloud agent read). For the Copilot CLI, repo-level hooks fire once `.github/hooks/impeccable.json` is committed to the repository's default branch.
-
-On **Cursor**, the hook runs on `postToolUse` for the `Write` tool (every agent file edit) and returns its reminder as `additional_context`, which Cursor adds after the tool result. Projects set up before this ran a `preToolUse` gate (`hook-before-edit`) that blocked bad writes before they landed; that gate still works until `hooks on`, `impeccable update`, or `impeccable doctor --fix` moves the entry to `postToolUse`.
-
-Gemini installs session and completion hooks in `.gemini/settings.json`, merged into the settings already there (comments are tolerated; a commented file is backed up to `settings.json.bak` before the rewrite, and a file that is not valid JSON is left alone). It does not install a per-edit detector hook. The `BeforeTool` hook only rewrites shell commands that run `build-phase`, and only on macOS and Linux; on Windows (where Gemini runs hooks through PowerShell) no session id reaches the shell, so a comp build is not tied to the session and the completion reminder stays silent.
-
 ## Routing
 
 The first argument is the action. Defaults to `status`.
@@ -27,18 +21,18 @@ The first argument is the action. Defaults to `status`.
 | Action | What it does |
 |---|---|
 | `status` | Print current state, shared/local config paths, ignored rules / files / values, env override. |
-| `on` | Automatic detector setup is unavailable in this Antigravity edition. Use manual `detect`. |
+| `on` | Automatic hook integration is configured separately. Use manual `detect` until the hook is verified. |
 | `off` | Set `enabled: false` in `.impeccable/config.json`. |
 | `ignore-rule <id>` | Append `<id>` to `detector.ignoreRules`; for `overused-font`, requires `--all-values`. Suppresses the rule across the whole project. |
 | `ignore-file <glob>` | Append `<glob>` to `detector.ignoreFiles`. Suppresses **every** rule for matching files. |
 | `ignore-value <id> <value> [--shared] [--reason "..."]` | Append a rule/value suppression to shared `.impeccable/config.json`. |
 | `ignore-value <id> <value> --local [--reason "..."]` | Append a private rule/value suppression to `.impeccable/config.local.json`. |
 | `ignore-value <id> "*" --file <glob> [--file <glob>...]` | Turn one rule off in matching files only, leaving it active everywhere else. Repeat `--file`, or use `--file=<glob>` / `--files=<glob>`. A bare `"*"` with no `--file` is refused: use `ignore-rule <id>` if you really mean project-wide. |
-| `reset` | Delete the project config, dedup cache, and Cursor pending queue, and remove the hook's entries from every provider manifest `on` installs, the committed Copilot file included (a team-shared `settings.json` that `on` never writes is never touched). |
+| `reset` | Delete the project config and detector caches, and remove hook entries installed by the engine. Review the scope first. |
 
 ## Flow
 
-1. Resolve the action from the user's argument. Default to `status`. For `on`, explain that this edition has no supported automatic detector setup for Antigravity and point to manual `detect`. Do not run `hooks on` from this host.
+1. Resolve the action from the user's argument. Default to `status`. For `on`, point to the [upstream setup instructions](https://github.com/pbakaus/impeccable) for the user’s environment and use manual `detect` until a hook is verified. Stop here for `on`.
 2. Invoke the admin script and pass the user's output through verbatim:
 
    ```bash
@@ -46,7 +40,7 @@ The first argument is the action. Defaults to `status`.
    ```
 
 3. For ignore changes, the default scope is shared `.impeccable/config.json`. Add `--local` only for an explicitly requested private exception.
-4. For `status`, explain that the printed state is configuration and identify manual `detect` as the Antigravity scan.
+4. For `status`, explain that the printed state is configuration and use manual `detect` when hook delivery is unverified.
 
 ## Triage findings
 
@@ -102,10 +96,10 @@ Example whole-file exception, for a file that is out of scope entirely:
 
 - Never modify `.impeccable/config.json` or `.impeccable/config.local.json` by hand from this command. Always go through `impeccable hooks` so writes stay validated and the file shape stays consistent. One exception: `detector.extensions` has no admin action, so when the user asks to cover a template stack, edit that one field in `.impeccable/config.json` directly and leave the rest of the file untouched.
 - Do not edit the launcher or the binary behind `impeccable hook` and `impeccable hook-before-edit` from this flow. Those are skill plumbing.
-- The hook never blocks an edit; it emits a post-edit reminder. (A Cursor project still on the old `preToolUse` gate can block a write until its manifest is migrated.) Disabling stops the reminders.
-- The hook is bundled with the Impeccable skill. Project installs use `.claude/settings.local.json`, `.codex/hooks.json`, `.cursor/hooks.json`, `.github/hooks/impeccable.json`, and `.gemini/settings.json`; a user-scope Claude install uses `~/.claude/settings.json`. On Codex, the user must approve the hook via `/hooks` the first time. On Cursor, confirm hooks are enabled under Settings -> Hooks. On GitHub Copilot, the CLI loads `.github/hooks/impeccable.json` once it is committed to the repository's default branch, and the cloud agent reads it from the repo directly.
+- The current per-edit hook emits a reminder after the edit. Older pre-edit hooks may block writes. Disabling stops hook reminders.
+- Leave registrations, scope, and trust settings to the user’s agent configuration.
 
 ## Failure modes
 
 - If `.impeccable/config.json` or `.impeccable/config.local.json` is unreadable or malformed, the hook ignores that file and uses the remaining valid config/defaults. `impeccable hooks status` will show malformed files as ignored.
-- If the user asks to "disable the hook" globally, lead with `/impeccable hooks off` (persistent for this project; writes `hook.enabled: false` to config). The legacy `IMPECCABLE_HOOK_DISABLED=1` env var also works as a one-shot override that follows the shell.
+- If the user asks to "disable the hook" globally, lead with `impeccable hooks off` (persistent for this project; writes `hook.enabled: false` to config). The legacy `IMPECCABLE_HOOK_DISABLED=1` env var also works as a one-shot override that follows the shell.

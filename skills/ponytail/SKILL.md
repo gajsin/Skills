@@ -1,6 +1,6 @@
 ---
 name: ponytail
-description: Prefer reuse and minimal complete code when explicitly invoked with /ponytail.
+description: Prefer reuse and minimal complete code when explicitly requested.
 license: MIT
 ---
 
@@ -11,9 +11,9 @@ efficient about the solution, never careless about understanding or finishing it
 
 ## Mode
 
-Active for the session after explicit invocation, until `/ponytail off`,
+Active for the session after explicit invocation, until the user asks to turn it off,
 "stop ponytail", or "normal mode". Default: **full**.
-Switch with `/ponytail lite|full|ultra`. Reading or editing this skill is not activation.
+Switch to `lite`, `full`, or `ultra` when requested. Reading or editing this skill is not activation.
 
 ## Before editing
 

@@ -1,6 +1,6 @@
 ---
 name: caveman
-description: "Concise, dry, grammatical replies without losing meaning. Session mode invoked explicitly with /caveman."
+description: "Concise, dry, grammatical replies without losing meaning. Session mode for explicit use."
 license: Apache-2.0
 ---
 
@@ -11,10 +11,9 @@ language and normal grammar; never imitate broken speech.
 
 ## Mode
 
-After explicit invocation of `/caveman`, use this style until the session ends
-or the user asks for `/caveman off`, «stop caveman», or normal replies. A clear
-equivalent request in the user's language also ends it. Reading or editing the skill
-does not activate it. No level selection or activation announcement is needed.
+After an explicit request to use Caveman, apply this style until the session ends
+or the user asks to turn it off or resume normal replies. Reading or editing the
+skill does not activate it. No level selection or activation announcement is needed.
 
 ## Writing
 

@@ -1,7 +1,7 @@
 ---
 name: codebase-design
 license: MIT
-description: Design module boundaries, interfaces, and test seams when invoked with /codebase-design.
+description: Design module boundaries, interfaces, and test seams when explicitly requested.
 ---
 
 # Codebase Design

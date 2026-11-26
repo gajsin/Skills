@@ -1,7 +1,7 @@
 ---
 name: architecture-first
 license: MIT
-description: Trace the current path and choose the smallest supported design when invoked with /architecture-first.
+description: Trace the current path and choose the smallest supported design when explicitly requested.
 ---
 
 # Architecture First

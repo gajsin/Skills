@@ -1,7 +1,7 @@
 ---
 name: logo-interview
 license: MIT
-description: Adaptive logo interview, character exploration, and in-chat moodboards when explicitly invoked with /logo-interview.
+description: Adaptive logo interview, character exploration, and in-chat moodboards when explicitly requested.
 metadata:
   version: "1.6.0"
 ---

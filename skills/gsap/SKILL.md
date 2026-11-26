@@ -1,6 +1,6 @@
 ---
 name: gsap
-description: "Implement GSAP website animations with React lifecycle or ScrollTrigger guidance when needed. Invoke only via /gsap; do not activate automatically."
+description: "Implement GSAP website animations with React lifecycle or ScrollTrigger guidance when needed. Invoke explicitly."
 license: MIT
 ---
 

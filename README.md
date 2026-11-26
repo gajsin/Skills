@@ -2,8 +2,8 @@
 
 Reusable skills for coding agents: engineering discipline,
 debugging, review, interviews, UI design, animation, writing, and model
-qualification. The same skill directories are available for Codex, Claude Code,
-and Antigravity. Configure your agent's invocation and tools in your own setup.
+qualification. Use the same skill directories with any agent that supports
+`SKILL.md`. Configure invocation and tools in your own agent.
 
 [Download all skills](https://github.com/gajsin/Skills/releases/download/skills/gajsin-skills.zip)
 

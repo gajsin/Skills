@@ -1,6 +1,6 @@
 ---
 name: editor
-description: Write or edit articles, social posts, promotional copy, and publication drafts using the Redaktura editorial workflows. Invoke with /editor.
+description: Write or edit articles, social posts, promotional copy, and publication drafts using the Redaktura editorial workflows. Invoke explicitly.
 license: CC-BY-4.0
 ---
 

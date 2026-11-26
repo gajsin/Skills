@@ -1,7 +1,7 @@
 ---
 name: diagnosing-bugs
 license: MIT
-description: Build a reproduction loop and diagnose a hard bug when invoked with /diagnosing-bugs.
+description: Build a reproduction loop and diagnose a hard bug when explicitly requested.
 ---
 
 # Diagnosing Bugs

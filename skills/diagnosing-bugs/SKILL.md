@@ -46,7 +46,7 @@ Treat the loop as a product. Once you have _a_ loop, **tighten** it:
 - Can I make the signal sharper? (Assert on the specific symptom, not "didn't crash".)
 - Can I make it more deterministic? (Pin time, seed RNG, isolate filesystem, freeze network.)
 
-A 30-second flaky loop is barely better than no loop; a 2-second deterministic one is tight, a debugging superpower.
+Keep any wait required to reproduce the symptom. A reliable loop can take minutes.
 
 ### Non-deterministic bugs
 
@@ -56,13 +56,12 @@ The goal is not a clean repro but a **higher reproduction rate**. Loop the trigg
 
 Stop and say so explicitly. List what you tried. Ask the user for: (a) access to whatever environment reproduces it, (b) a redacted captured artifact (HAR file, log dump, core dump, screen recording with timestamps), or (c) permission to add temporary production instrumentation. Do **not** proceed to hypothesise without a loop.
 
-### Completion criterion: a tight loop that goes red
+### Completion criterion
 
-Phase 1 is done when the loop is **tight** and **red-capable**: you can name **one command** (a script path, a test invocation, a curl) that you have **already run at least once** (show the invocation and its output, redacted), and that is:
+Phase 1 is done when you can name **one command** (a script path, a test invocation, a curl command) that you have **already run at least once**. Show the redacted invocation and output, and verify that the command meets the following criteria.
 
 - [ ] **Red-capable**: it drives the actual bug code path and asserts the **user's exact symptom**, so it can go red on this bug and green once fixed. Not "runs without erroring"; it must be able to _catch this specific bug_.
 - [ ] **Deterministic**: same verdict every run (flaky bugs: a pinned, high reproduction rate, per above).
-- [ ] **Fast**: seconds, not minutes.
 - [ ] **Runnable signal**: automate it where possible. A human-in-the-loop script requires live user input; report that limitation and repeat the observation when needed. Do not claim unattended or deterministic verification from one human answer.
 
 Read code to find a seam where the feedback loop can reach the bug. If you catch yourself building a theory of the cause before this command exists, **stop: jumping straight to a hypothesis is the exact failure this skill prevents.** No red-capable command, no Phase 2.

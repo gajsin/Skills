@@ -89,19 +89,19 @@ existing coverage where it verifies the failure path.
 ## Implementation loop
 
 1. Record the request’s acceptance criteria, no-touch areas, and protected data.
-2. Trace the current and reference paths end to end.
-3. Produce a one-sentence design: “Preserve behavior X; implement through Y; leave Z
+2. Produce a one-sentence design: “Preserve behavior X; implement through Y; leave Z
    untouched.”
-4. Choose the smallest meaningful verification for the changed behavior and risk.
-   Reuse existing checks; add a failing regression check when coverage is missing.
+3. Choose the smallest meaningful verification for the changed behavior and risk.
+   Reuse existing checks and add focused coverage for gaps.
+   For an existing scenario at risk, identify the expected observable result and
+   ensure the chosen check would detect a regression. If the result is uncertain,
+   establish it on the unchanged path before editing when safe and practical,
+   then compare after editing. State any material limit on the comparison.
    A low-risk documentation or metadata edit may be verified by direct inspection.
-5. Edit the owning seam. Avoid event-specific rules, duplicated pipelines, speculative
+4. Edit the owning seam. Avoid event-specific rules, duplicated pipelines, speculative
    abstractions, and compatibility layers without a real caller.
-6. Run the focused check, affected tests, and the repository’s required gates.
+5. Run the focused check, affected tests, and the repository’s required gates.
    Repeat checks to resolve a failure, a further change, or a concrete remaining risk.
-7. Inspect the final diff against the one-sentence design. Remove unrelated changes
-   you introduced; preserve pre-existing and user-owned edits. When staging is
-   authorized, use an explicit allowlist in a worktree with protected changes.
 
 ## Review and release gate
 
@@ -109,7 +109,10 @@ When spec-review is also invoked for this change, use it for the standards/spec
 review below; do not launch a duplicate set of reviewers. This does not replace
 a domain skill's distinct visual or runtime checks.
 
-First review the full diff yourself against both questions:
+First review the full diff yourself against the one-sentence design and both
+questions below. Remove unrelated changes you introduced and preserve pre-existing
+and user-owned edits. When staging is authorized, use an explicit allowlist in a
+worktree with protected changes.
 
 - **Architecture/spec:** Does the diff preserve the required reference behavior and
   use the best-supported design without scope creep or an unjustified second system?
